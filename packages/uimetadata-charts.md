@@ -65,6 +65,13 @@ para ese chart — es la clave que conecta la tarjeta con `renderChart`. El
 botón "expandir" ya viene cableado (`onclick="openChartModal('Id')"`) —
 no hace falta ningún setup de JS aparte.
 
+**Demo en vivo** — un chart `area` real, renderizado con ApexCharts (cargado
+solo en esta página, igual que hace `_ChartsScripts.cshtml` en la app real):
+
+<div style="border:1px solid #e5e7eb;border-radius:10px;padding:1rem 1.2rem;margin:1rem 0;">
+  <div id="dd-chart-demo" style="min-height:220px;"></div>
+</div>
+
 ### El modal de "expandir" (una sola vez por página)
 
 ```csharp
@@ -95,6 +102,31 @@ setKpiBadge("kpi-savings-badge", 12.5, "% vs año anterior"); // badge con signo
 el borde izquierdo de la tarjeta. `InitialValueText`/`InitialBadgeText` son
 el placeholder mientras tu fetch todavía no respondió (default: `"—"` /
 `"cargando..."`).
+
+**Demo en vivo**:
+
+<style>
+.dd-kpi-card { display: inline-block; min-width: 200px; border-radius: 10px; border: 1px solid #e5e7eb; border-left: 4px solid #2563eb; padding: .9rem 1.1rem; margin-right: 1rem; }
+.dd-kpi-card.dd-success { border-left-color: #16a34a; }
+.dd-kpi-card.dd-danger { border-left-color: #dc2626; }
+.dd-kpi-label { font-size: .78rem; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; }
+.dd-kpi-value { font-size: 1.5rem; font-weight: 700; margin: .2rem 0; }
+.dd-kpi-badge { font-size: .78rem; padding: 2px 8px; border-radius: 999px; }
+.dd-kpi-badge.dd-pos { background: rgba(22,163,74,.12); color: #16a34a; }
+.dd-kpi-badge.dd-neg { background: rgba(220,38,38,.12); color: #dc2626; }
+</style>
+<div>
+  <div class="dd-kpi-card">
+    <div class="dd-kpi-label">Ahorro acumulado</div>
+    <div class="dd-kpi-value">1.234 €</div>
+    <span class="dd-kpi-badge dd-pos">▲ 12.5% vs año anterior</span>
+  </div>
+  <div class="dd-kpi-card dd-danger">
+    <div class="dd-kpi-label">Gastos</div>
+    <div class="dd-kpi-value">890 €</div>
+    <span class="dd-kpi-badge dd-neg">▼ 4.2% vs mes anterior</span>
+  </div>
+</div>
 
 ## `chart.options` — opciones custom de ApexCharts desde el backend
 

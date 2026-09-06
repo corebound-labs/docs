@@ -18,6 +18,34 @@ Para cualquier modal (de contenido libre o de formulario crear/editar),
 notificaciones toast, o diálogos de confirmación — sin reinventar overlay/
 animación/accesibilidad de teclado por cada caso.
 
+<style>
+.dd-m-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 9998; align-items: center; justify-content: center; }
+.dd-m-overlay.dd-active { display: flex; }
+.dd-m-content { background: #fff; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,.25); width: 90%; max-width: 420px; padding: 1.3rem 1.4rem; }
+.dd-m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
+.dd-m-header h4 { margin: 0; }
+.dd-m-close { border: none; background: none; font-size: 1.1rem; cursor: pointer; color: #6b7280; }
+.dd-m-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.1rem; }
+.dd-m-btn { padding: 7px 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; cursor: pointer; font-size: .85rem; }
+.dd-m-btn.dd-primary { background: linear-gradient(135deg,#60a5fa,#2563eb); color: #fff; border: none; }
+.dd-m-btn.dd-danger { background: linear-gradient(135deg,#ff4d4d,#d32f2f); color: #fff; border: none; }
+.dd-toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.dd-toast { min-width: 240px; padding: 10px 14px; border-radius: 8px; background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.18); border-left: 4px solid #2563eb; font-size: .85rem; opacity: 0; transform: translateX(20px); transition: all .25s; }
+.dd-toast.dd-show { opacity: 1; transform: translateX(0); }
+.dd-toast.dd-success { border-left-color: #16a34a; }
+.dd-toast.dd-error { border-left-color: #dc2626; }
+.dd-toast.dd-warning { border-left-color: #f59e0b; }
+</style>
+<div id="dd-confirm-overlay" class="dd-m-overlay">
+  <div class="dd-m-content" style="max-width:360px;">
+    <p id="dd-confirm-msg" style="margin:0 0 1rem;"></p>
+    <div class="dd-m-actions">
+      <button class="dd-m-btn" onclick="ddCloseModal('dd-confirm-overlay')">Cancelar</button>
+      <button id="dd-confirm-yes" class="dd-m-btn dd-primary">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 ## Instalación
 
 ```xml
@@ -65,6 +93,23 @@ closeModal("myModal");
 
 `_ModalActions.cshtml` es opcional — si tu modal no necesita cancelar/
 guardar (ej. un visor de imagen), no lo incluyas.
+
+**Demo en vivo**:
+
+<button class="dd-loader-demo-btn" style="padding:7px 14px;border-radius:6px;border:1px solid #2563eb;color:#2563eb;background:#fff;cursor:pointer;" onclick="ddOpenModal('dd-demo-modal')">Abrir modal</button>
+<div id="dd-demo-modal" class="dd-m-overlay" onclick="if(event.target===event.currentTarget) ddCloseModal('dd-demo-modal')">
+  <div class="dd-m-content">
+    <div class="dd-m-header">
+      <h4>Lo que quieras</h4>
+      <button class="dd-m-close" onclick="ddCloseModal('dd-demo-modal')">✕</button>
+    </div>
+    <p style="color:#6b7280;">Contenido propio acá — texto, una imagen, un widget, lo que sea.</p>
+    <div class="dd-m-actions">
+      <button class="dd-m-btn" onclick="ddCloseModal('dd-demo-modal')">Cancelar</button>
+      <button class="dd-m-btn dd-primary" onclick="ddCloseModal('dd-demo-modal'); ddToast('success','Guardado (demo)')">Guardar</button>
+    </div>
+  </div>
+</div>
 
 ## Modal en una sola llamada (`ViewComponent`)
 
@@ -165,6 +210,14 @@ showToast({ type: "success", icon: "🎉", text: "Listo", durationMs: 6000 });
 
 `durationMs: 0` deja el toast visible hasta que el usuario lo cierra con ×.
 
+**Demo en vivo**:
+
+<div class="dd-box" style="border:1px solid #e5e7eb;border-radius:10px;padding:1rem 1.2rem;margin:1rem 0;">
+  <button class="dd-m-btn dd-primary" onclick="ddToast('success','Se guardó correctamente')">Success</button>
+  <button class="dd-m-btn dd-danger" onclick="ddToast('error','No se pudo guardar')">Error</button>
+  <button class="dd-m-btn" onclick="ddToast('warning','Revisá los campos marcados')">Warning</button>
+</div>
+
 ## Confirm — uso mínimo
 
 Reemplaza `window.confirm()` (bloqueante, sin estilo) por una versión
@@ -181,6 +234,12 @@ if (!confirmed) return;
 
 Se resuelve `true`/`false` — nunca rechaza la promesa. Cierra con Escape,
 Enter (confirma), o clic fuera del modal (cancela).
+
+**Demo en vivo**:
+
+<div class="dd-box" style="border:1px solid #e5e7eb;border-radius:10px;padding:1rem 1.2rem;margin:1rem 0;">
+  <button class="dd-m-btn dd-danger" onclick="ddConfirm('¿Estás seguro de que deseas eliminar este registro?', true, function(){ ddToast('success','Eliminado (demo)'); })">Eliminar registro</button>
+</div>
 
 ## Archivos a tocar/crear al integrarlo en un proyecto nuevo
 
