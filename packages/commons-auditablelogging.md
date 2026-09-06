@@ -4,15 +4,22 @@
 
 `SaveChangesInterceptor` de EF Core que sella automáticamente quién/cuándo
 insertó o actualizó una fila, aplica soft-delete, y — para entidades que
-opten por auditoría completa — escribe una fila de `AuditLog` por cada
-columna que cambió. Todo por convención de interfaces, sin código adicional
-en los Handlers.
+además opten por auditoría completa — escribe una fila de `AuditLog` por
+cada columna que cambió. Ningún Handler necesita llamar nada a mano; basta
+con que la entidad implemente la interfaz correcta.
+
+> Nota de namespace: las interfaces `IHasInsertUser`/`IHasInsertDate`/
+> `IHasUpdateUser`/`IHasUpdateDate`/`IHasLastUpdate`/`IHasInsertAudit`/
+> `IHasUpdateAudit`/`IHasUpsertAudit` viven físicamente en este paquete
+> (`Interfaces/`) pero bajo el namespace `Commons.CrudOrm.Entities.Functionality`
+> — un artefacto histórico, no una dependencia real a `Commons.CrudOrm` (el
+> `.csproj` no lo referencia, compila standalone — verificado).
 
 ## Cuándo usarlo
 
-Cuando necesitás trazabilidad de quién/cuándo creó o modificó cada fila
-(y opcionalmente un historial columna por columna de qué cambió) sin
-repetir esa lógica a mano en cada Handler de guardado.
+Cuando necesitás trazabilidad de quién/cuándo creó o modificó cada fila (y
+opcionalmente un historial columna por columna de qué cambió) sin repetir
+esa lógica a mano en cada Handler de guardado.
 
 ## Instalación
 
@@ -30,7 +37,16 @@ services.AddDbContext<EcoTrackDbContext>((sp, options) =>
 });
 ```
 
+`AddAuditableLogging<TDbContext>` registra `IHttpContextAccessor`,
+`IIdentityService → IdentityService` (Scoped), el
+`AuditBackgroundService<TDbContext>` (hosted service), el interceptor en
+sí (Scoped), un `AuditableDbContext` propio sobre la misma connection
+string, y — de forma síncrona al arrancar — crea la tabla `LOG__Audit` si
+no existe (vía `ExecuteSqlRaw`).
+
 ## Ejemplo mínimo de uso
+
+Sellos de auditoría sin log de columnas:
 
 ```csharp
 public class Account : BaseEntity<Guid>, IHasUpsertAudit, ISoftDeleteable
@@ -44,33 +60,47 @@ public class Account : BaseEntity<Guid>, IHasUpsertAudit, ISoftDeleteable
 ```
 
 Agregando además `IAuditable` (marcador vacío) se activa el log completo de
-columnas en `LOG__Audit`.
+columnas en `LOG__Audit`:
+
+```csharp
+public class Transaction : BaseEntity<Guid>, IHasUpsertAudit, IAuditable { ... }
+```
+
+Ninguna de las dos requiere código adicional en el Handler.
 
 ## Archivos a tocar/crear al integrarlo en un proyecto nuevo
 
 1. `ProjectReference` al proyecto de persistencia.
-2. `services.AddAuditableLogging<TDbContext>(connectionString)` + `options.AddAuditableInterceptor<TDbContext>(sp)`.
-3. Las entidades a auditar implementan `IHasInsertAudit`/`IHasUpdateAudit`/`IHasUpsertAudit` (agregando las propiedades correspondientes); `ISoftDeleteable` para soft-delete; `IAuditable` para log columna por columna.
+2. `services.AddAuditableLogging<TDbContext>(connectionString)` + `options.AddAuditableInterceptor<TDbContext>(sp)` en el registro de `AddDbContext`.
+3. Las entidades a auditar implementan `IHasInsertAudit`/`IHasUpdateAudit`/`IHasUpsertAudit` (agregando las propiedades correspondientes); `ISoftDeleteable` para soft-delete (`bool IsDeleted`); `IAuditable` para log completo de cambios (marcador vacío, sin propiedades).
 4. Nada más — `IHttpContextAccessor`/`IIdentityService` quedan registrados automáticamente.
 
-## Interfaces principales
+## Interfaces y helpers
 
 | Interfaz | Propósito |
 |---|---|
-| `IAuditable` | Marcador vacío — log completo de columnas en `LOG__Audit`. |
-| `ISoftDeleteable` | `bool IsDeleted` — un `Delete` se convierte en `Modified` + `IsDeleted=true`. |
-| `IHasInsertAudit` / `IHasUpdateAudit` / `IHasUpsertAudit` | Sellos de creación/modificación (usuario + fecha). |
-| `IIdentityService` | `GetName()`/`GetId()` — resuelve el usuario actual desde `HttpContext`. |
+| `IAuditable` | Marcador vacío — opta al log completo de columnas en `LOG__Audit`. |
+| `ISoftDeleteable` | `bool IsDeleted` — un `Delete` se convierte en `Modified` + `IsDeleted=true` en vez de borrar la fila. |
+| `IHasInsertUser`/`IHasInsertDate`/`IHasInsertAudit` | Sellos de creación (el tercero combina los dos primeros). |
+| `IHasUpdateUser`/`IHasUpdateDate`/`IHasUpdateAudit` | Sellos de modificación. |
+| `IHasUpsertAudit` | `IHasInsertAudit` + `IHasUpdateAudit` combinados. |
+| `IIdentityService` | `GetName()` (email, para auditoría), `GetId()` (NameIdentifier, para filtros/FK) — resuelve el usuario actual desde `HttpContext`. |
 
-> Nota: estas interfaces viven físicamente en este paquete pero bajo el
-> namespace `Commons.CrudOrm.Entities.Functionality` (artefacto histórico)
-> — no representan una dependencia real a `Commons.CrudOrm`.
+Extension methods (`AuditExtensions`) para setear estos campos a mano
+cuando hace falta fuera del interceptor: `SetInsertUser(username)`,
+`SetInsertDate()`, `SetInsertAudit(username)`, `SetUpdateUser(username)`,
+`SetUpdateDate()`, `SetUpdateAudit(username)`, `SetUpsertAudit(username)`,
+`SetLastUpdate()`.
 
-`AuditBackgroundService` drena en batch cada 5 segundos una cola en memoria
-encolada por el interceptor — el guardado de la entidad no espera a que se
-escriba el log.
+`AuditInterceptor<TDbContext>` actúa en `SavingChangesAsync` (setea sellos,
+aplica soft-delete, encola `AuditLog` en una `ConcurrentQueue` estática por
+cada columna cambiada de una entidad `IAuditable`) y en `SavedChangesAsync`
+(resuelve las claves primarias reales de filas recién insertadas antes de
+encolarlas). `AuditBackgroundService<TDbContext>` drena esa cola cada 5
+segundos y persiste los `AuditLog` en batch — el guardado real de la
+entidad no espera a que se escriba el log de auditoría.
 
 ## Dependencias
 
 Ninguna real de otro paquete `Commons.*`/`UiMetadata.*` (ver nota de
-namespace).
+namespace arriba).

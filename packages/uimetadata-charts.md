@@ -7,11 +7,18 @@ CSS custom properties (`--chart-*`) y el traductor genérico de un
 `ChartViewModel` (`Id`/`Type`/`Title`/`Labels`/`Series`/`Options`) a
 opciones de ApexCharts según `Type` (`line`/`area`/`bar`/`donut`/`pie`).
 
+```mermaid
+graph LR
+    Charts[UiMetadata.Charts] --> Modal[UiMetadata.Modal]
+```
+
 ## Cuándo usarlo
 
-Para pintar cualquier cantidad de charts/KPIs en cualquier vista — **no
-hay** un componente "Dashboard" monolítico, cada tarjeta es independiente y
-el layout (columnas, proporciones) lo decide el consumidor con su propio CSS.
+Para pintar cualquier cantidad de charts/KPIs en cualquier vista. **No hay
+"el dashboard"**: cada tarjeta de chart o de KPI es independiente. Un view
+puede pintar una sola, veinte, o ninguna — no existe un componente
+monolítico que las agrupe. El layout (columnas, proporciones) es 100%
+decisión del consumidor, con su propio CSS.
 
 ## Instalación
 
@@ -28,13 +35,18 @@ builder.Services.AddControllersWithViews()
 @await Html.PartialAsync("~/Views/Shared/_ChartsScripts.cshtml")
 ```
 
-Ese partial trae ApexCharts (versión + `integrity` fijas) + `charts.css`/
-`charts.js`. **No** forma parte de `_UiMetadataStyles.cshtml`/
+Ese partial trae ApexCharts (versión + `integrity` fijas, ver más abajo) +
+`charts.css`/`charts.js`. **No** forma parte de `_UiMetadataStyles.cshtml`/
 `_UiMetadataScripts.cshtml` (los agregadores de toda la familia) — no todas
 las páginas tienen charts, así que no debe cargar global. Cada vista con
 `_ChartCard.cshtml` incluye `_ChartsScripts.cshtml` por su cuenta.
 
-## Ejemplo mínimo de uso
+La versión/`integrity` de ApexCharts vive en `_ChartsScripts.cshtml`, no en
+la vista consumidora — `charts.js` está escrito contra la API de una
+versión concreta; si el pin viviera en cada vista, un cambio ahí podría
+romper `charts.js` sin tocar la RCL en absoluto.
+
+## Ejemplo mínimo de uso — Chart
 
 ```csharp
 @await Html.PartialAsync("~/Views/Shared/_ChartCard.cshtml", new UiMetadata.Charts.Models.ChartCardModel
@@ -48,7 +60,24 @@ const charts = await (await fetch(loadChartUrl)).json(); // shape { id, type, ti
 charts.forEach(c => renderChart(c, `#${c.id}`));
 ```
 
-KPI card:
+`ChartCardModel.Id` tiene que coincidir con el `Id` que devuelve tu backend
+para ese chart — es la clave que conecta la tarjeta con `renderChart`. El
+botón "expandir" ya viene cableado (`onclick="openChartModal('Id')"`) —
+no hace falta ningún setup de JS aparte.
+
+### El modal de "expandir" (una sola vez por página)
+
+```csharp
+@await Html.PartialAsync("~/Views/Shared/_ChartModal.cshtml")
+```
+
+Sea cual sea la cantidad de `_ChartCard.cshtml`, esta partial se incluye
+**una sola vez** — `openChartModal(id)` resuelve qué chart mostrar contra
+el registro interno de `charts.js` (se completa solo al llamar
+`renderChart`). Reusa el chrome `.ui-modal`/`.ui-modal-content-lg` de
+`UiMetadata.Modal` en vez de un sistema de modal aparte.
+
+## Ejemplo mínimo de uso — KPI card
 
 ```csharp
 @await Html.PartialAsync("~/Views/Shared/_KpiCard.cshtml", new UiMetadata.Charts.Models.KpiCardModel
@@ -58,33 +87,53 @@ KPI card:
 ```
 
 ```js
-document.getElementById("kpi-savings").textContent = "1.234 €";
-setKpiBadge("kpi-savings-badge", 12.5, "% vs año anterior");
+document.getElementById("kpi-savings").textContent = "1.234 €"; // Id = id del <div class="kpi-value">
+setKpiBadge("kpi-savings-badge", 12.5, "% vs año anterior"); // badge con signo, verde/rojo
 ```
+
+`Accent`: `null`/`"primary"` (default), `"success"` o `"danger"` — controla
+el borde izquierdo de la tarjeta. `InitialValueText`/`InitialBadgeText` son
+el placeholder mientras tu fetch todavía no respondió (default: `"—"` /
+`"cargando..."`).
+
+## `chart.options` — opciones custom de ApexCharts desde el backend
+
+El motor mergea `chart.options` (lo que mande tu backend, cualquier forma
+válida de opciones de ApexCharts) sobre las opciones base que arma según
+`type` — los colores del tema tienen prioridad salvo que el backend mande
+`colors` explícito. Para el `total.label` del centro de un chart `donut`
+(texto libre, ej. "Ahorro"), pasá `donutTotalLabel` en `Options` — el motor
+no tiene ningún texto de negocio hardcodeado, sin esto cae al genérico
+`"Total"`.
 
 ## Archivos a tocar/crear al integrarlo en un proyecto nuevo
 
 1. `ProjectReference` + `.AddUiMetadataCharts()`.
 2. `_ChartsScripts.cshtml` en cada vista con charts (no en el layout global).
 3. `_ChartCard.cshtml`/`_KpiCard.cshtml` por cada chart/KPI.
-4. `_ChartModal.cshtml` una sola vez por página (el modal de "expandir chart" — resuelve qué chart mostrar contra el registro interno de `charts.js`).
+4. `_ChartModal.cshtml` una sola vez por página.
 5. Un endpoint backend que devuelva `ChartViewModel[]` con el shape esperado.
-6. El propio layout de columnas (CSS) — el paquete no ofrece utilidades `.charts-grid-N`, cada consumidor arma el suyo.
+6. El propio layout de columnas (CSS) — el paquete no ofrece utilidades `.charts-grid-N`, cada consumidor arma el suyo (ej. `.chart-grid-top`/`.chart-grid-bot` de EcoTrack, 2.5fr/1.5fr, es decisión de esa página, no del paquete).
 
 ## Design tokens (`--chart-*`, sin capa `:root` propia)
 
 A propósito no hay bloque `:root` en `charts.css` — a diferencia de
-`grid.css`, acá los tokens **son** los valores finales que el consumidor
-define en su tema; el fallback vive en el punto de uso para no arriesgar
-pisar el valor real por orden de carga de `<link>`.
+`grid.css` (donde `--grid-*` deriva de tokens base con
+`var(--token-base, literal)`), acá `--chart-card-shadow` y compañía **son**
+los tokens finales que el consumidor define directo en su tema. Un `:root`
+con la misma especificidad en este paquete pisaría ese valor real según el
+orden de carga de los `<link>` — el fallback vive en el punto de uso.
 
 | Token | Usado por |
 |---|---|
 | `--chart-card-bg-start`/`-end`, `-border`, `-shadow`, `-hover-shadow`, `-hover-border` | `.chart-card` |
 | `--chart-kpi-hover-shadow` | `.kpi-card:hover` |
-| `--chart-positive`/`-positive-end`/`-negative`/`-negative-end` | Colores de series (leídos por JS) |
+| `--chart-positive`/`-positive-end`/`-negative`/`-negative-end` | Colores de series (leídos por JS, `charts.js`) |
 | `--chart-area-start`/`-end` | Gradiente de charts `line`/`area` |
-| `--chart-grid-soft`/`-strong`, `--chart-donut-track`, `--chart-glow`, `--chart-donut-label`/`-value` | Resto del theming de ApexCharts |
+| `--chart-grid-soft`/`-strong`, `--chart-donut-track`, `--chart-glow`, `--chart-marker-fill`, `--chart-donut-label`/`-value`, `--chart-stroke-contrast`, `--chart-tooltip-theme`, `--chart-theme-mode`, `--chart-bg` | Resto del theming de ApexCharts, leído por JS |
+
+Los "leídos por JS" no tienen fallback en CSS — el `cssVar(name, fallback)`
+de `charts.js` tiene su propio segundo argumento para eso.
 
 ## Dependencias
 

@@ -3,7 +3,9 @@
 ## Qué es
 
 Atributos y metadata en C# puro para decorar ViewModels que se renderizan
-con `UiMetadata.Grid` (u otro consumidor futuro).
+con `UiMetadata.Grid` (u otro consumidor futuro). Sin dependencia de
+ASP.NET Core ni de ningún otro paquete `UiMetadata.*` — puro C#, es el
+paquete base del que depende `UiMetadata.Grid`.
 
 ## Cuándo usarlo
 
@@ -19,8 +21,6 @@ controller — `UiMetadata.Grid` lee estos atributos por reflection.
 ```
 
 > Cuando exista feed NuGet: `<PackageReference Include="UiMetadata.Contracts" Version="..." />`.
-
-Sin dependencia de ASP.NET Core ni de ningún otro paquete `UiMetadata.*`.
 
 ## Ejemplo mínimo de uso
 
@@ -46,27 +46,65 @@ public class AccountViewModel
 
 ## Atributos disponibles
 
-| Atributo | Qué hace |
-|---|---|
-| `[GridHidden]` | Oculta la propiedad como columna de la tabla. |
-| `[ModalHidden]` | Oculta la propiedad como input del modal. |
-| `[DisplayName(string)]` (propiedad) | Nombre a mostrar en vez del nombre de la propiedad. |
-| `[DisplayName(string)]` (clase) | Título de la entidad — `GridConfigBuilder.Build<T>()` autocompleta `EntityTitle`/`ModalTitle`. |
-| `[RequiredField(errorMessage?)]` | Campo obligatorio en el modal (`data-val-required`). |
-| `[BadgeField]` | Columna como pill vía `UiMetadata.Elements` — requiere tenerlo referenciado. |
-| `[EnumSource(Type enumType)]` | Campo como `<select>` con los valores del enum (filtra `[Browsable(false)]`). |
-| `[SubgridEditable(DefaultValue?, AllowPastDates=false)]` | Campo editable inline en el mini-modal de subgrid. |
-| `[DynamicSubgridOptionsAttribute(optionsPropertyName)]` | Subgrid que se llena por JS leyendo otra propiedad `List<T>` del mismo ViewModel. |
-| `[SliderField(min, max, step=1, ShowValue=true)]` | Campo numérico como `<input type="range">`. |
+| Atributo | Qué hace | Contrato / advertencias |
+|---|---|---|
+| `[GridHidden]` | Oculta la propiedad como columna de la tabla. | Marcador puro, sin parámetros. |
+| `[ModalHidden]` | Oculta la propiedad como input del modal. | Marcador puro, sin parámetros. |
+| `[DisplayName(string)]` sobre una **propiedad** | Nombre a mostrar en vez del nombre de la propiedad. | El texto se usa tal cual, sin escapar aparte del que Razor ya hace. |
+| `[DisplayName(string)]` sobre la **clase** | Título de la entidad — `GridConfigBuilder.Build<T>()` lo lee y autocompleta `GridConfig.EntityTitle`/`ModalTitle`, y `LoadGridPartial` autocompleta `ViewData["EntityTitle"]` con eso si el controller no lo seteó ya a mano. | Si no está presente, `EntityTitle` queda vacío y el controller debe seguir seteando `ViewData["EntityTitle"]`/`config.ModalTitle` a mano — es opt-in, no rompe nada existente. |
+| `[RequiredField(string errorMessage = "Campo obligatorio")]` | Marca el campo como obligatorio en el modal; el mensaje se renderiza como `data-val-required`. | — |
+| `[BadgeField]` | Pinta la columna como pill vía `UiMetadata.Elements` en vez de texto plano. | Requiere que el consumidor final tenga referenciado `UiMetadata.Elements` — si no, `UiMetadata.Grid` no encuentra la partial y el request falla. |
+| `[EnumSource(Type enumType)]` | El campo se renderiza como `<select>` con las opciones del enum indicado (filtra valores marcados `[Browsable(false)]`). | `enumType` debe ser un `enum` de verdad — no se valida en tiempo de compilación. |
+| `[SubgridEditable(object? DefaultValue = null, bool AllowPastDates = false)]` | El campo es editable inline desde el mini-modal de subgrid. | Solo tiene efecto en propiedades de un tipo usado como elemento de una lista (`List<T>`) marcada como subgrid — en el tipo raíz no hace nada. `AllowPastDates` solo aplica a campos de fecha: por defecto el mini-modal no deja elegir una fecha anterior a hoy; para un campo histórico (ej. fecha de nacimiento) hay que marcarlo `true` explícitamente. |
+| `[DynamicSubgridOptionsAttribute(string optionsPropertyName)]` | El subgrid de esta lista se llena por JS (`fillModalForm`) leyendo `optionsPropertyName` en vez de una lista estática. | **Contrato por convención de nombre, no verificado en compilación**: `optionsPropertyName` debe ser el nombre exacto de otra propiedad `List<T>` del MISMO ViewModel. Si el nombre no existe o cambia sin actualizar el atributo, `_Grid.cshtml` simplemente no encuentra el dato (falla silenciosa, sin excepción). |
+| `[SliderField(double min, double max, double step = 1, bool ShowValue = true)]` | El campo se renderiza como `<input type="range">` (vía `UiMetadata.Elements`) en vez del `<input type="number">` por defecto. | Solo tiene efecto en propiedades numéricas — en cualquier otro tipo se ignora silenciosamente. |
 
-## Flags leídos por convención de nombre (no son atributos)
+## Flags leídos por convención de nombre (no son atributos, son propiedades)
 
-| Nombre esperado | Tipo | Default | Efecto |
+`UiMetadata.Grid` lee estas propiedades del ViewModel por reflection si
+existen, con un valor por defecto si no existen. No hace falta declarar
+nada especial — basta con que la propiedad exista con el nombre y tipo
+`bool` exactos:
+
+| Nombre esperado | Tipo | Default si falta | Efecto |
 |---|---|---|---|
-| `CanOpenModal` | `bool` | `true` | Oculta el botón/bloquea abrir modal en esa fila si es `false`. |
-| `CanDeleteRow` | `bool` | `true` | Oculta el botón eliminar de esa fila. |
-| `CanRowAction` | `bool` | `false` | Habilita el botón de `RowAction` custom. |
-| `IsInactiveRow` | `bool` | `false` | Marca la fila como tachada y bloquea abrir modal/detalle. |
+| `CanOpenModal` | `bool` | `true` | Oculta el botón de esa fila si es `false` **y** bloquea abrir el modal si se clickea la fila directamente (cuando `RowClickAction = "Modal"`). |
+| `CanDeleteRow` | `bool` | `true` | Oculta el botón eliminar de esa fila si es `false`. |
+| `CanRowAction` | `bool` | `false` | Habilita el botón de `RowAction` custom para esa fila. |
+| `IsInactiveRow` | `bool` | `false` | Marca la fila con la clase `row-deleted` (tachado) y bloquea abrir modal/detalle al hacer click. |
+
+## `RowClickAction` / `DetailsButtonAction` (config, no por fila)
+
+Dos propiedades de `GridConfig`, independientes entre sí, que definen qué
+pasa con la fila:
+
+| Propiedad | Valores | Default | Efecto |
+|---|---|---|---|
+| `RowClickAction` | `"Modal"` / `"Details"` / `"None"` | `"Modal"` | Qué hace clickear la fila (fuera de los botones). |
+| `DetailsButtonAction` | `"Modal"` / `"Details"` / `"None"` | `"Details"` | Qué hace el botón de la fila (junto al de eliminar) — su ícono/título cambia según el valor: ✏️ "Editar" para `"Modal"`, 🔍 para `"Details"`. |
+
+Ejemplo (subgrids Wallet/Card se abren en modal, pero clickear la fila de
+una Account navega a `Account/Details`):
+
+```csharp
+config.RowClickAction = "Details";
+config.DetailsButtonAction = "Modal";
+```
+
+## Menos config en los controllers
+
+Dos cosas que antes había que repetir a mano en cada `[HttpPost]` de cada
+controller y ahora se resuelven solas:
+
+1. **`ViewData["EntityTypeName"]`**: `LoadGridPartial<T>` lo autocompleta siempre como `typeof(T).Name` — nunca hace falta setearlo.
+2. **`ViewData["EntityTitle"]` / `config.ModalTitle`**: decorá la clase del ViewModel con `[DisplayName("cuenta")]` una sola vez y `GridConfigBuilder.Build<T>()` completa ambos. Si igual se setean a mano antes de `LoadPartial`, esas siguen ganando (el auto-fill solo entra si están vacías).
+
+`UiMetadata.Contracts.Builders.FkOptionsBuilder` tiene una sobrecarga con
+selectores (`Build(items, x => x.Id, x => x.Name)`) además de la de
+reflection por nombre de propiedad — necesaria para listas de tuplas con
+nombre (`List<(Guid Id, string Name)>`, común en los `Result` de los
+Handlers de `EcoTrack.Application`) donde la reflection por nombre falla
+porque `Id`/`Name` no son propiedades reales del `ValueTuple` en runtime.
 
 ## Dependencias
 
