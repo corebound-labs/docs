@@ -20,6 +20,47 @@ con mecánica propia, no controles atómicos.
 Para cualquier control visual pequeño y genérico (sin lógica de negocio)
 que se repetiría igual en otro proyecto.
 
+<style>
+.dd-box { border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.1rem 1.3rem; margin: 1rem 0 1.6rem; background: #fafafa; }
+.dd-box code.dd-out { font-size: .82rem; color: #6b7280; }
+/* Switch */
+.dd-switch { position: relative; display: inline-block; width: 44px; height: 24px; vertical-align: middle; }
+.dd-switch input { opacity: 0; width: 0; height: 0; }
+.dd-switch .dd-slider { position: absolute; cursor: pointer; inset: 0; background-color: #d1d5db; border-radius: 24px; transition: background-color .2s; }
+.dd-switch .dd-slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.dd-switch input:checked + .dd-slider { background-color: #2563eb; }
+.dd-switch input:checked + .dd-slider::before { transform: translateX(20px); }
+/* ActionButton */
+.dd-action-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; border-radius: 6px; cursor: pointer; color: #fff; font-size: 15px; margin-right: 8px; transition: filter .15s, transform .1s; }
+.dd-action-btn:active { transform: scale(.93); }
+.dd-action-btn:hover { filter: brightness(1.08); }
+.dd-action-btn.dd-edit { background: linear-gradient(135deg,#60a5fa,#2563eb); }
+.dd-action-btn.dd-delete { background: linear-gradient(135deg,#ff4d4d,#d32f2f); }
+.dd-action-btn.dd-add { background: linear-gradient(135deg,#4ade80,#16a34a); }
+/* Badge */
+.dd-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; color: #fff; font-size: .78rem; font-weight: 600; margin-right: 8px; }
+/* Tabs */
+.dd-tabs-strip { display: flex; gap: 4px; border-bottom: 1px solid #e5e7eb; margin-bottom: .9rem; }
+.dd-tab-btn { border: none; background: transparent; padding: 8px 14px; cursor: pointer; font-size: .88rem; color: #6b7280; border-bottom: 2px solid transparent; }
+.dd-tab-btn.dd-active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+.dd-tab-panel { display: none; }
+.dd-tab-panel.dd-active { display: block; }
+/* StatusCard / SettingsCard */
+.dd-status-card { display: grid; gap: .6rem; padding: 1rem 1.2rem; border-radius: 10px; background: #fff; border: 1px solid #e5e7eb; }
+.dd-status-card.dd-success { border-left: 4px solid #16a34a; }
+.dd-status-card.dd-danger { border-left: 4px solid #dc2626; }
+.dd-status-card h4 { margin: 0; }
+.dd-status-card p { margin: 0; color: #6b7280; }
+.dd-kicker { display: inline-flex; width: fit-content; padding: 3px 9px; border-radius: 999px; background: rgba(37,99,235,.12); color: #2563eb; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.dd-btn-link { color: #2563eb; text-decoration: none; font-size: .85rem; cursor: pointer; background: none; border: 1px solid #2563eb; border-radius: 6px; padding: 5px 10px; }
+/* Loader */
+.dd-loader-demo-btn { padding: 7px 14px; border-radius: 6px; border: 1px solid #2563eb; color: #2563eb; background: #fff; cursor: pointer; }
+.dd-loader-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 9999; align-items: center; justify-content: center; }
+.dd-loader-overlay.dd-active { display: flex; }
+.dd-loader-spinner { width: 54px; height: 54px; border: 5px solid rgba(255,255,255,.2); border-top-color: #7b2ff7; border-radius: 50%; animation: dd-spin .8s linear infinite; }
+@keyframes dd-spin { to { transform: rotate(360deg); } }
+</style>
+
 ## Instalación
 
 ```xml
@@ -56,6 +97,16 @@ builder.Services.AddControllersWithViews()
 > nunca añade `disabled` al `<input>` real — réplica intencional del
 > markup previo a la extracción.
 
+**Demo en vivo** — click para togglear:
+
+<div class="dd-box">
+  <label class="dd-switch">
+    <input type="checkbox" checked id="dd-switch-1" onchange="document.getElementById('dd-switch-1-label').textContent = this.checked ? 'Activo' : 'Inactivo'">
+    <span class="dd-slider"></span>
+  </label>
+  <span id="dd-switch-1-label" style="margin-left:10px;">Activo</span>
+</div>
+
 ## ActionButton
 
 ```csharp
@@ -73,6 +124,15 @@ const editBtn = createEditButton((btn) => editRow(btn.closest("tr")));
 const deleteBtn = createDeleteButton((btn) => removeRow(btn));
 const btn = createActionButton({ cssClass: "btn-action", text: "📥", onClick: (b) => doImport(b) });
 ```
+
+**Demo en vivo** — los 3 presets:
+
+<div class="dd-box">
+  <button class="dd-action-btn dd-edit" title="Editar" onclick="document.getElementById('dd-action-out').textContent = 'Editar clickeado'">✏️</button>
+  <button class="dd-action-btn dd-delete" title="Eliminar" onclick="document.getElementById('dd-action-out').textContent = 'Eliminar clickeado'">🗑️</button>
+  <button class="dd-action-btn dd-add" title="Agregar" onclick="document.getElementById('dd-action-out').textContent = 'Agregar clickeado'">➕</button>
+  <div style="margin-top:.6rem;"><code class="dd-out" id="dd-action-out">(click un botón)</code></div>
+</div>
 
 ## Inputs simples
 
@@ -99,6 +159,13 @@ sobre el mismo `SimpleInputModel`.
 actualizado en vivo con un `oninput` simple. En `UiMetadata.Grid` se activa
 por reflection con `[SliderField(min, max, step)]` (`UiMetadata.Contracts`)
 en vez de usarse manualmente.
+
+**Demo en vivo**:
+
+<div class="dd-box">
+  <input type="range" min="0" max="100" step="5" value="50" style="accent-color:#2563eb; vertical-align:middle;" oninput="document.getElementById('dd-slider-out').textContent = this.value">
+  <span id="dd-slider-out" style="margin-left:10px; font-weight:600;">50</span>
+</div>
 
 ## Select
 
@@ -127,6 +194,26 @@ new SelectModel
 }
 ```
 
+**Demo en vivo** — elegir un país filtra las ciudades del segundo select
+(la misma mecánica que resuelve `applyCascade` en `grid.js`):
+
+<div class="dd-box">
+  <select id="dd-country" style="padding:5px 8px; border-radius:6px; border:1px solid #d1d5db;" onchange="
+    var city = document.getElementById('dd-city');
+    var opts = { ar: ['Buenos Aires','Córdoba','Rosario'], es: ['Madrid','Barcelona','Valencia'], mx: ['CDMX','Guadalajara','Monterrey'] };
+    city.innerHTML = opts[this.value].map(function(c){ return '<option>' + c + '</option>'; }).join('');
+  ">
+    <option value="ar">Argentina</option>
+    <option value="es">España</option>
+    <option value="mx">México</option>
+  </select>
+  <select id="dd-city" style="padding:5px 8px; border-radius:6px; border:1px solid #d1d5db; margin-left:8px;">
+    <option>Buenos Aires</option>
+    <option>Córdoba</option>
+    <option>Rosario</option>
+  </select>
+</div>
+
 ## Badge
 
 ```csharp
@@ -140,6 +227,14 @@ No trae colores por valor — eso lo decide el consumidor:
 [data-badge-value="owner"] { background-color: #2563eb; }
 [data-badge-value="edit"]  { background-color: #16a34a; }
 ```
+
+**Demo en vivo** — colores puestos por el consumidor, no por el paquete:
+
+<div class="dd-box">
+  <span class="dd-badge" style="background:#2563eb;">Owner</span>
+  <span class="dd-badge" style="background:#16a34a;">Edit</span>
+  <span class="dd-badge" style="background:#6b7280;">Read-only</span>
+</div>
 
 ## Tabs
 
@@ -188,6 +283,17 @@ El id de cada panel es siempre `tabPanel_{TabsId}_{TabId}` — `switchTab`
 busca por ese prefijo en todo el documento, sin exigir un wrapper
 particular. `.tab-panel`/`.active` es lo único que toca; no toca contenido.
 
+**Demo en vivo**:
+
+<div class="dd-box">
+  <div class="dd-tabs-strip">
+    <button class="dd-tab-btn dd-active" onclick="ddSwitchTab(this,'dd-tp-info')">ℹ️ Info</button>
+    <button class="dd-tab-btn" onclick="ddSwitchTab(this,'dd-tp-hist')">🕒 Historial</button>
+  </div>
+  <div id="dd-tp-info" class="dd-tab-panel dd-active">Contenido del panel "Info" — cualquier partial estático.</div>
+  <div id="dd-tp-hist" class="dd-tab-panel">Contenido del panel "Historial" — otro partial, sin relación con el primero.</div>
+</div>
+
 ## StatusCard
 
 Kicker + `<h2>` + `<p>` + acciones — pantalla de "resultado de una acción"
@@ -210,6 +316,22 @@ algunos call sites originales embeben markup simple (`<strong>`) dentro del
 mensaje. Cada `Actions[i].CssClass` es libre (default `auth-secondary-link`)
 — las clases de botón en sí siguen viviendo en el `auth.css` de la app
 consumidora, no son parte de este componente.
+
+**Demo en vivo** — cambiá la variante:
+
+<div class="dd-box">
+  <div style="margin-bottom:.8rem;">
+    <button class="dd-btn-link" onclick="ddSetStatusVariant('dd-status-card','')">Neutral</button>
+    <button class="dd-btn-link" onclick="ddSetStatusVariant('dd-status-card','dd-success')">Success</button>
+    <button class="dd-btn-link" onclick="ddSetStatusVariant('dd-status-card','dd-danger')">Danger</button>
+  </div>
+  <div id="dd-status-card" class="dd-status-card dd-success">
+    <span class="dd-kicker">Estado de validación</span>
+    <h4>Correo confirmado</h4>
+    <p>Ya podés iniciar sesión con tu cuenta.</p>
+    <div><a class="dd-btn-link" style="text-decoration:none;">Ir al login</a></div>
+  </div>
+</div>
 
 ## SettingsCard
 
@@ -234,6 +356,23 @@ consumidor, pasado como template delegate de Razor:
 `Variant = "danger"` (para una "zona de peligro") agrega `is-danger` a la
 tarjeta y a su kicker.
 
+**Demo en vivo**:
+
+<div class="dd-box">
+  <div class="dd-status-card" style="border-left:none;">
+    <span class="dd-kicker">Preferencias</span>
+    <h4>Divisa por defecto</h4>
+    <p>Se usa para convertir tus gráficos y KPIs.</p>
+    <div>
+      <select style="padding:5px 8px; border-radius:6px; border:1px solid #d1d5db;">
+        <option>EUR — Euro</option>
+        <option>USD — Dólar</option>
+      </select>
+      <button class="dd-btn-link" style="margin-left:8px;">Guardar preferencias</button>
+    </div>
+  </div>
+</div>
+
 ## Loader (overlay de carga global)
 
 ```csharp
@@ -249,6 +388,17 @@ Overlay CSS puro (sin GIF) — `showLoader`/`hideLoader` mantienen el mismo
 nombre/firma que cualquier implementación anterior basada en imagen, son
 parte del contrato que ya invocan `grid.js` y el JS de la app (togglean la
 clase `.is-active` sobre `#app-loader`).
+
+**Demo en vivo** (1.5s):
+
+<div class="dd-box">
+  <button class="dd-loader-demo-btn" onclick="
+    var o = document.getElementById('dd-loader-overlay');
+    o.classList.add('dd-active');
+    setTimeout(function(){ o.classList.remove('dd-active'); }, 1500);
+  ">Mostrar loader</button>
+</div>
+<div id="dd-loader-overlay" class="dd-loader-overlay"><div class="dd-loader-spinner"></div></div>
 
 ## Archivos a tocar/crear al integrarlo en un proyecto nuevo
 

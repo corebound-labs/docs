@@ -12,6 +12,41 @@ Es su propio paquete (no vive en `UiMetadata.Elements`) por el mismo motivo
 que `UiMetadata.Modal`: es un sistema con su propia mecánica de
 interacción, no un control atómico.
 
+**Demo en vivo** — click en el botón hamburguesa para colapsar/expandir
+(la misma mecánica real, en miniatura):
+
+<style>
+.dd-sb-shell { display: flex; height: 260px; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+.dd-sb { width: 190px; background: #111827; color: #e5e7eb; transition: width .2s; display: flex; flex-direction: column; padding: .8rem .6rem; }
+.dd-sb.dd-collapsed { width: 56px; }
+.dd-sb-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; }
+.dd-sb-mark { width: 26px; height: 26px; border-radius: 8px; background: #7b2ff7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dd-sb-nav { display: flex; flex-direction: column; gap: 4px; }
+.dd-sb-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; white-space: nowrap; overflow: hidden; font-size: .85rem; cursor: pointer; }
+.dd-sb-item:hover, .dd-sb-item.dd-active { background: rgba(255,255,255,.08); }
+.dd-sb-main { flex: 1; display: flex; flex-direction: column; }
+.dd-sb-topbar { display: flex; align-items: center; gap: 10px; padding: .6rem .9rem; border-bottom: 1px solid #e5e7eb; }
+.dd-sb-toggle { border: none; background: #f3f4f6; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; }
+.dd-sb-content { flex: 1; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: .85rem; }
+</style>
+<div class="dd-sb-shell">
+  <div class="dd-sb" id="dd-sidebar">
+    <div class="dd-sb-brand"><span class="dd-sb-mark">E</span><span class="dd-sb-brand-text">MiApp</span></div>
+    <div class="dd-sb-nav">
+      <div class="dd-sb-item dd-active">🏠 <span class="dd-sb-brand-text">Inicio</span></div>
+      <div class="dd-sb-item">👤 <span class="dd-sb-brand-text">Perfil</span></div>
+      <div class="dd-sb-item">⚙️ <span class="dd-sb-brand-text">Ajustes</span></div>
+    </div>
+  </div>
+  <div class="dd-sb-main">
+    <div class="dd-sb-topbar">
+      <button class="dd-sb-toggle" onclick="document.getElementById('dd-sidebar').classList.toggle('dd-collapsed')">☰</button>
+      <span style="font-size:.85rem;color:#6b7280;">Vista actual: Inicio</span>
+    </div>
+    <div class="dd-sb-content">@RenderBody()</div>
+  </div>
+</div>
+
 ## Cuándo usarlo
 
 Cuando tu app tiene un shell con sidebar de navegación lateral y no querés

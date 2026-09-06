@@ -9,6 +9,84 @@
 <body>
   <div id="app"></div>
   <script>
+    // Helpers compartidos por los demos interactivos embebidos en las
+    // paginas de packages/*.md. Viven acá (cargados una sola vez de forma
+    // normal) en vez de en <script> dentro del markdown — Docsify no
+    // re-ejecuta esos scripts de forma confiable entre navegaciones (SPA,
+    // reemplaza innerHTML), así que la única lógica que puede vivir inline
+    // en el markdown es un one-liner de handler (onclick="..."), nunca una
+    // función declarada en un <script> propio de esa página.
+    function ddOpenModal(id) { document.getElementById(id).classList.add('dd-active'); }
+    function ddCloseModal(id) { document.getElementById(id).classList.remove('dd-active'); }
+
+    function ddToast(type, text) {
+      var c = document.getElementById('dd-toast-container');
+      if (!c) {
+        c = document.createElement('div');
+        c.id = 'dd-toast-container';
+        c.className = 'dd-toast-container';
+        document.body.appendChild(c);
+      }
+      var t = document.createElement('div');
+      t.className = 'dd-toast dd-' + type;
+      t.textContent = text;
+      c.appendChild(t);
+      requestAnimationFrame(function () { t.classList.add('dd-show'); });
+      setTimeout(function () {
+        t.classList.remove('dd-show');
+        setTimeout(function () { t.remove(); }, 250);
+      }, 3000);
+    }
+
+    function ddConfirm(message, danger, onYes) {
+      document.getElementById('dd-confirm-msg').textContent = message;
+      var yesBtn = document.getElementById('dd-confirm-yes');
+      yesBtn.className = 'dd-m-btn ' + (danger ? 'dd-danger' : 'dd-primary');
+      yesBtn.onclick = function () { ddCloseModal('dd-confirm-overlay'); onYes(); };
+      ddOpenModal('dd-confirm-overlay');
+    }
+
+    function ddSwitchTab(btn, panelId) {
+      var strip = btn.closest('.dd-tabs-strip');
+      strip.querySelectorAll('.dd-tab-btn').forEach(function (b) { b.classList.remove('dd-active'); });
+      btn.classList.add('dd-active');
+      var box = strip.closest('.dd-box');
+      box.querySelectorAll('.dd-tab-panel').forEach(function (p) { p.classList.remove('dd-active'); });
+      document.getElementById(panelId).classList.add('dd-active');
+    }
+
+    function ddSetStatusVariant(id, cls) {
+      var card = document.getElementById(id);
+      card.classList.remove('dd-success', 'dd-danger');
+      if (cls) card.classList.add(cls);
+    }
+
+    // El chart demo de uimetadata-charts.md no tiene botón — debe
+    // auto-renderizarse al entrar a esa página. doneEach corre después de
+    // cada navegación (incluida la primera carga), así que revisamos si el
+    // contenedor del demo está en el DOM actual.
+    function ddRenderChartDemo() {
+      var el = document.getElementById('dd-chart-demo');
+      if (!el || el.dataset.rendered) return;
+      el.dataset.rendered = '1';
+      function render() {
+        new ApexCharts(el, {
+          chart: { type: 'area', height: 220, toolbar: { show: false } },
+          series: [{ name: 'Balance', data: [1200, 1900, 1500, 2400, 2100, 3000, 2800] }],
+          xaxis: { categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'] },
+          colors: ['#2563eb'],
+          fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05 } },
+          dataLabels: { enabled: false },
+          stroke: { curve: 'smooth', width: 2 }
+        }).render();
+      }
+      if (window.ApexCharts) { render(); return; }
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/apexcharts@3.45.1/dist/apexcharts.min.js';
+      s.onload = render;
+      document.head.appendChild(s);
+    }
+
     window.$docsify = {
       name: 'Corebound Labs Docs',
       loadSidebar: true,
@@ -16,7 +94,12 @@
       onlyCover: false,
       subMaxLevel: 2,
       search: 'auto',
-      auto2top: true
+      auto2top: true,
+      plugins: [
+        function (hook) {
+          hook.doneEach(function () { ddRenderChartDemo(); });
+        }
+      ]
     }
   </script>
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
