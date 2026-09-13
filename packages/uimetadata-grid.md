@@ -141,6 +141,23 @@ empiezan marcadas; "todas marcadas" y "ninguna marcada" se tratan igual
 (buscar en toda la fila). `SearchableFields = null` (default) = sin
 dropdown, buscador de siempre.
 
+## Bloqueo de campos en el subgrid (`LockedFields`) y valores por defecto
+
+El mini-modal de subgrid bloquea ciertos campos con `lockField(field)` en vez
+de `field.disabled = true` — un input `disabled` no viaja en el `FormData`
+del submit, así que bloquear un campo así lo excluía silenciosamente del
+guardado (causó bugs reales: "La billetera no existe" al editar una
+Transaction con un campo bloqueado). `lockField` usa `readOnly` en inputs de
+texto/número, y la clase `.field-locked` (`pointer-events: none`) + `tabIndex
+= -1` en `<select>`/checkbox/radio, que no soportan `readonly`.
+`UiMetadata.Modal`'s `openFormModal` limpia los tres marcadores al resetear
+el formulario.
+
+`[SubgridEditable(DefaultValue = ...)]` (ver página de `UiMetadata.Contracts`)
+rellena el campo con ese valor al crear una fila NUEVA del subgrid
+(`applySubgridDefaults` en `grid.js`) — nunca pisa un valor ya presente, así
+que una fila cargada desde la base de datos no se ve afectada.
+
 ## Convenciones por nombre de propiedad
 
 Ver la tabla "Flags leídos por convención de nombre" en la página de
