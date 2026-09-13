@@ -69,6 +69,37 @@ directa, sin capa intermedia.
 tienen ningún consumidor en el repo actual** de EcoTrack — todos los
 Handlers usan `ICommonRepository` directo.
 
+## `splitQuery` (opcional, default `false`)
+
+Las sobrecargas de `LoadAsync`/`FindAsync`/`GetListAsync` que reciben
+`TrackingMode` (y la de `GetListAsync` con `ignoreQueryFilters`) aceptan
+también `bool splitQuery = false`, justo antes de `includes`:
+
+```csharp
+await repo.GetListAsync<Transaction>(
+    t => relevantIds.Contains(t.Id),
+    TrackingMode.Tracking,
+    splitQuery: true,
+    $"{nameof(Transaction.TransactionParticipants)}.{nameof(TransactionParticipant.Participant)}",
+    $"{nameof(Transaction.Wallet)}.{nameof(Wallet.WalletParticipants)}");
+```
+
+Traduce a `AsSplitQuery()` de EF Core: cada `Include` de colección se
+resuelve como una query `SELECT` separada en vez de un único `JOIN`. Sin
+esto, incluir más de una colección a la vez (como el ejemplo — dos
+colecciones distintas, `TransactionParticipants` y `Wallet.WalletParticipants`)
+produce el producto cartesiano de ambas por cada fila raíz — EF Core lo
+loguea como warning (`MultipleCollectionIncludeWarning`).
+
+Con un solo `Include` de colección (o ninguno) no cambia nada — `false` es
+siempre seguro como default. Activarlo cambia un roundtrip por varios, así
+que solo conviene cuando ese warning aparece en los logs o el perfil de la
+query lo justifica.
+
+Requiere el paquete `Microsoft.EntityFrameworkCore.Relational` (agregado
+como dependencia de `Commons.CrudOrm`) — `AsSplitQuery()` es un concepto de
+proveedores relacionales, no vive en el core de EF.
+
 ## `BaseEntity<TId>`
 
 Base abstracta con `Id` (marcado `[CrudOrmPrimaryKey]`), `GetId()`/
