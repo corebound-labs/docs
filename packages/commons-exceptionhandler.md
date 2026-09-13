@@ -4,11 +4,14 @@
 
 Middleware global de manejo de excepciones: `BaseException` (definida en
 este paquete) → 400, cualquier otra `Exception` → 500, respuesta JSON
-uniforme `{StatusCode, Message, Detailed}` (`Detailed` recorre toda la
-cadena de `InnerException`). Opcionalmente también acumula errores no
-fatales por request (`IErrorResponseService`), los procesa en background
-vía un `IAlertService` que implementa el consumidor, y puede loguear cada
-llamada a un endpoint en BD.
+`{StatusCode, Message, Detailed, CorrelationId}`. `Detailed` (mensaje +
+cadena de `InnerException`) solo se devuelve en el 400 — un 500 no expone su
+mensaje interno, `Message` es un texto genérico y `Detailed` viene `null`;
+el detalle completo con stack trace va al log (`_logger.LogError`), y el
+cliente solo recibe `CorrelationId` para reportarlo a soporte. Opcionalmente
+también acumula errores no fatales por request (`IErrorResponseService`),
+los procesa en background vía un `IAlertService` que implementa el
+consumidor, y puede loguear cada llamada a un endpoint en BD.
 
 ## Cuándo usarlo
 
@@ -106,6 +109,16 @@ StatusCode, IsNotified`) — la tabla se crea sola al arrancar si no existe.
 Este branch del middleware se salta en silencio si no hay ningún
 `ExceptionHandlerDbContext` registrado (el caso actual de EcoTrack).
 
+## `CorrelationId` (integración opcional con `Commons.Logging`)
+
+El middleware lee `HttpContext.Items["CorrelationId"]` — sin
+`ProjectReference` real a `Commons.Logging`, por convención de clave. Si su
+`UseCorrelationId()` está cargado antes en el pipeline, ese id (generado o
+tomado del header `X-Correlation-Id`) aparece en la respuesta; si no, cae al
+`TraceIdentifier` nativo de ASP.NET Core. Ver
+[Commons.Logging](commons-logging.md) para el detalle completo.
+
 ## Dependencias
 
-Ninguna de otro paquete `Commons.*`/`UiMetadata.*`.
+Ninguna de otro paquete `Commons.*`/`UiMetadata.*` (la integración con
+`Commons.Logging` es por convención, no por `ProjectReference`).
