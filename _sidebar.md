@@ -7,6 +7,7 @@
   - [Commons.ExceptionHandler](packages/commons-exceptionhandler.md)
   - [Commons.Email](packages/commons-email.md)
   - [Commons.Testing](packages/commons-testing.md)
+  - [Commons.BackgroundJobs](packages/commons-backgroundjobs.md)
 
 - **UiMetadata.\* (UI)**
   - [UiMetadata.Contracts](packages/uimetadata-contracts.md)
