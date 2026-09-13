@@ -84,7 +84,7 @@ Ninguna de las dos requiere código adicional en el Handler.
 | `IHasInsertUser`/`IHasInsertDate`/`IHasInsertAudit` | Sellos de creación (el tercero combina los dos primeros). |
 | `IHasUpdateUser`/`IHasUpdateDate`/`IHasUpdateAudit` | Sellos de modificación. |
 | `IHasUpsertAudit` | `IHasInsertAudit` + `IHasUpdateAudit` combinados. |
-| `IIdentityService` | `GetName()` (email, para auditoría), `GetId()` (NameIdentifier, para filtros/FK) — resuelve el usuario actual desde `HttpContext`. |
+| `IIdentityService` | `GetName()` (username/email de display), `GetId()` (NameIdentifier, el Id real) — resuelve el usuario actual desde `HttpContext`. `AuditInterceptor` sella `InsertUser`/`UpdateUser` con `GetId()`, no `GetName()` — ver sección abajo. |
 
 Extension methods (`AuditExtensions`) para setear estos campos a mano
 cuando hace falta fuera del interceptor: `SetInsertUser(username)`,
@@ -99,6 +99,26 @@ cada columna cambiada de una entidad `IAuditable`) y en `SavedChangesAsync`
 encolarlas). `AuditBackgroundService<TDbContext>` drena esa cola cada 5
 segundos y persiste los `AuditLog` en batch — el guardado real de la
 entidad no espera a que se escriba el log de auditoría.
+
+## `InsertUser`/`UpdateUser` guardan el Id real del usuario, no un username
+
+`AuditInterceptor` sella estos campos con `GetId()` (el Id real, vía
+`ClaimTypes.NameIdentifier`) — no `GetName()` (`Identity.Name`, username/
+email de display). Es la única fuente de "quién hizo esto" comparable
+contra un `userId` real de dominio (ej. `Participant.UserId`).
+
+Antes de este fix usaban `GetName()`, un string de otro dominio no
+comparable — lo que llevó a que algunas entidades de EcoTrack (`Card`,
+`Transaction`, `ScheduledTransaction`) agregaran su propio
+`CreatedByUserId: string` en paralelo, duplicando lo que `InsertUser` ya
+debería haber cubierto. Ya no hace falta: `InsertUser` se fija una sola vez
+al insertar y nunca se reescribe en updates, así que sirve directamente
+como "quién es el dueño/creador de esta fila" para lógica de permisos.
+
+**Testeando contra `Commons.Testing.InMemoryCommonRepository`**: el fake no
+simula el interceptor (no tiene noción de "usuario actual") — un test que
+crea una entidad nueva a través de un Handler no puede aserir el
+`InsertUser` resultante; esa responsabilidad es del interceptor real.
 
 ## Dependencias
 
