@@ -9,7 +9,7 @@ EcoTrack directamente.
 
 ## Empezar
 
-- **Paquetes `Commons.*`** — lógica de backend pura, sin UI: [CrudOrm](packages/commons-crudorm.md), [Infisical](packages/commons-infisical.md), [AuditableLogging](packages/commons-auditablelogging.md), [ExceptionHandler](packages/commons-exceptionhandler.md), [Email](packages/commons-email.md), [Testing](packages/commons-testing.md), [BackgroundJobs](packages/commons-backgroundjobs.md).
+- **Paquetes `Commons.*`** — lógica de backend pura, sin UI: [CrudOrm](packages/commons-crudorm.md), [Infisical](packages/commons-infisical.md), [AuditableLogging](packages/commons-auditablelogging.md), [ExceptionHandler](packages/commons-exceptionhandler.md), [Email](packages/commons-email.md), [Testing](packages/commons-testing.md), [BackgroundJobs](packages/commons-backgroundjobs.md), [Logging](packages/commons-logging.md).
 - **Paquetes `UiMetadata.*`** — Razor Class Libraries de UI: [Contracts](packages/uimetadata-contracts.md), [Grid](packages/uimetadata-grid.md), [Modal](packages/uimetadata-modal.md), [Elements](packages/uimetadata-elements.md), [Sidebar](packages/uimetadata-sidebar.md), [Charts](packages/uimetadata-charts.md).
 
 ## Mapa de dependencias
@@ -32,6 +32,7 @@ graph TD
         Email[Email]
         Testing[Testing]
         Jobs[BackgroundJobs]
+        Logging[Logging]
     end
 
     Grid --> Contracts
@@ -40,6 +41,8 @@ graph TD
     Charts --> Modal
     Testing --> CrudOrm
     Testing -.->|"solo namespace, sin ProjectReference"| Audit
+    Logging --> Jobs
+    Logging -.->|"por convención de clave, sin ProjectReference"| ExcHandler
 
     click Contracts "packages/uimetadata-contracts.md"
     click Elements "packages/uimetadata-elements.md"
@@ -54,6 +57,7 @@ graph TD
     click Email "packages/commons-email.md"
     click Testing "packages/commons-testing.md"
     click Jobs "packages/commons-backgroundjobs.md"
+    click Logging "packages/commons-logging.md"
 ```
 
 Sin flecha entrante = paquete base, sin dependencias de otro `Commons.*`/

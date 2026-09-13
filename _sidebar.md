@@ -8,6 +8,7 @@
   - [Commons.Email](packages/commons-email.md)
   - [Commons.Testing](packages/commons-testing.md)
   - [Commons.BackgroundJobs](packages/commons-backgroundjobs.md)
+  - [Commons.Logging](packages/commons-logging.md)
 
 - **UiMetadata.\* (UI)**
   - [UiMetadata.Contracts](packages/uimetadata-contracts.md)
