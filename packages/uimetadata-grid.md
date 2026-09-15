@@ -189,6 +189,24 @@ Sin ningún `[GridPriority]`, nada de esto se activa. **Limitación conocida**:
 un cambio de ancho del contenedor sin `resize` de ventana (ej. colapsar el
 sidebar en desktop) no re-adapta las columnas hasta el próximo resize.
 
+## Acciones compactas en móvil (menú contextual)
+
+Debajo de 599px de viewport, las columnas de acción (editar/ver, eliminar,
+acción custom de `GridConfig.RowAction`) se reemplazan por una sola columna
+de 44px: un botón `⋮` con menú contextual si la fila tiene 2+ acciones, la
+acción directa si tiene una sola, o nada si no tiene ninguna.
+
+- Sin configuración: el menú se arma con los botones ya renderizados en la
+  fila (`data-field="__details"`/`"__delete"`/`"__rowaction"`), así que los
+  permisos por fila se respetan solos y cada opción dispara el botón original
+  (mismos handlers, mismo `confirmDialog`).
+- El texto de cada opción es el `title` del botón (`"Editar"`, `"Ver detalle"`,
+  `"Eliminar"`, o el `Title` del `RowAction`).
+- Menú `position: fixed` en `<body>`; se cierra con clic afuera, `Escape` o
+  scroll. Tocar `⋮` no dispara la acción de la fila.
+- Se combina con `[GridPriority]` (el espacio liberado permite mostrar más
+  columnas). Aplica a cualquier grid con acciones; arriba de 599px no cambia.
+
 ## Convenciones por nombre de propiedad
 
 Ver la tabla "Flags leídos por convención de nombre" en la página de
