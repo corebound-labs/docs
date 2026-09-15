@@ -158,6 +158,37 @@ rellena el campo con ese valor al crear una fila NUEVA del subgrid
 (`applySubgridDefaults` en `grid.js`) — nunca pisa un valor ya presente, así
 que una fila cargada desde la base de datos no se ve afectada.
 
+## Ocultamiento progresivo de columnas (`[GridPriority]`)
+
+Para tablas que no entran en pantallas angostas: en vez de achicar todas las
+columnas hasta volverlas ilegibles (o forzar scroll horizontal), se ocultan
+las prescindibles y cada fila gana un botón ▸ que despliega sus valores
+(patrón "FooTable").
+
+```csharp
+[DisplayName("Nombre")]                        // sin atributo = "core", nunca se oculta
+public string Name { get; set; }
+
+[GridPriority(2)] [DisplayName("Descripción")] // mayor número = se oculta primero
+public string Description { get; set; }
+
+[GridPriority(1)] [DisplayName("Activo")]      // se oculta después
+public bool Enabled { get; set; }
+```
+
+- Al iniciar, al cambiar el ancho de la ventana y al mostrarse su pestaña
+  (`tab:shown`), `grid.js` mide las columnas de datos; si alguna queda debajo
+  de 90px, oculta la de mayor prioridad y repite hasta que todas entren.
+- Las columnas de acción (editar/eliminar/acción custom) nunca se ocultan.
+- Solo recalcula si cambió el **ancho** — en móvil la barra de direcciones
+  dispara `resize` al scrollear, y sin ese corte se cerraba la fila desplegada.
+- La fila desplegada reusa el contenido ya renderizado, sin pedido extra al
+  servidor; el clic en ▸ no dispara la acción de la fila.
+
+Sin ningún `[GridPriority]`, nada de esto se activa. **Limitación conocida**:
+un cambio de ancho del contenedor sin `resize` de ventana (ej. colapsar el
+sidebar en desktop) no re-adapta las columnas hasta el próximo resize.
+
 ## Convenciones por nombre de propiedad
 
 Ver la tabla "Flags leídos por convención de nombre" en la página de
