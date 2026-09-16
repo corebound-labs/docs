@@ -32,14 +32,29 @@ builder.Services.AddControllersWithViews()
 ```
 
 ```csharp
+@section Styles {
+    @await Html.PartialAsync("~/Views/Shared/_ChartsStyles.cshtml")
+}
 @await Html.PartialAsync("~/Views/Shared/_ChartsScripts.cshtml")
 ```
 
-Ese partial trae ApexCharts (versión + `integrity` fijas, ver más abajo) +
-`charts.css`/`charts.js`. **No** forma parte de `_UiMetadataStyles.cshtml`/
+`_ChartsStyles.cshtml` (solo `charts.css`) y `_ChartsScripts.cshtml`
+(ApexCharts CDN + `charts.js`) están separados a propósito, no es solo
+prolijidad — requiere que `_Layout.cshtml` tenga
+`@await RenderSectionAsync("Styles", required: false)` en el `<head>`.
+Motivo real: `_ChartsScripts.cshtml` va al final del `<body>` (con el resto
+de `<script>`); si `charts.css` viajaba pegado ahí, el navegador pintaba el
+HTML de cada `.chart-card` **antes** de procesar ese `<link>` — durante ese
+lapso (que coincide con la ventana en la que el chart todavía ni tiene
+datos) las tarjetas se veían sin estilo, un cuadrado blanco en vez del
+fondo oscuro de `.chart-card`, hasta que el CSS terminaba de aplicarse. El
+JS sí puede seguir al final del body sin este problema — solo el CSS causa
+ese flash.
+
+Ninguno de los dos partials forma parte de `_UiMetadataStyles.cshtml`/
 `_UiMetadataScripts.cshtml` (los agregadores de toda la familia) — no todas
-las páginas tienen charts, así que no debe cargar global. Cada vista con
-`_ChartCard.cshtml` incluye `_ChartsScripts.cshtml` por su cuenta.
+las páginas tienen charts, así que no deben cargar global. Cada vista con
+`_ChartCard.cshtml` incluye ambos por su cuenta.
 
 La versión/`integrity` de ApexCharts vive en `_ChartsScripts.cshtml`, no en
 la vista consumidora — `charts.js` está escrito contra la API de una
@@ -141,7 +156,7 @@ no tiene ningún texto de negocio hardcodeado, sin esto cae al genérico
 ## Archivos a tocar/crear al integrarlo en un proyecto nuevo
 
 1. `ProjectReference` + `.AddUiMetadataCharts()`.
-2. `_ChartsScripts.cshtml` en cada vista con charts (no en el layout global).
+2. `_ChartsStyles.cshtml` (vía `@section Styles`, requiere esa sección en el `<head>` de `_Layout.cshtml`) + `_ChartsScripts.cshtml`, en cada vista con charts — no en el layout global.
 3. `_ChartCard.cshtml`/`_KpiCard.cshtml` por cada chart/KPI.
 4. `_ChartModal.cshtml` una sola vez por página.
 5. Un endpoint backend que devuelva `ChartViewModel[]` con el shape esperado.
