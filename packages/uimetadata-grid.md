@@ -141,6 +141,50 @@ empiezan marcadas; "todas marcadas" y "ninguna marcada" se tratan igual
 (buscar en toda la fila). `SearchableFields = null` (default) = sin
 dropdown, buscador de siempre.
 
+## Orden por columna (click en el header, "como Excel")
+
+Cualquier header de columna con datos reales (no las de acción, ni la
+sintética `ButtonForURL`) es clickeable y ordena el grid — el ícono pasa de
+`↕` a `▲`/`▼` según la dirección. Mismo campo = alterna asc/desc; campo
+distinto = arranca en ascendente. Sin tercer estado "sin ordenar" a
+propósito (dos clicks alcanzan).
+
+Ordena por el **valor real** de cada fila (lo saca de `data-entity`, el
+JSON que cada `.table-row` ya trae para el modal de edición), no por el
+texto ya formateado de la celda. El comparador detecta números, fechas ISO
+y texto (`localeCompare` español, `numeric: true`). Reordena los nodos del
+DOM de verdad, así el rayado zebra también queda correcto en el nuevo
+orden.
+
+**Limitación conocida**: una columna que muestra un valor ya formateado
+(ej. `AmountFormatted`, texto tipo "1.234,56 €") ordena como texto, no
+numéricamente — puede dar un orden raro entre montos de distinta cantidad
+de dígitos. No hay ningún atributo `[SortKey]` para resolverlo hoy.
+
+## Barra de controles en mobile: buscador colapsable, menú de filas, "+ Crear" como ícono
+
+Arriba de 599px no cambia nada. Por debajo, para que buscador + selector de
+filas + botón de alta entren en una sola fila sin saltar de línea:
+
+- **"+ Crear"** se ve como ícono circular (mismo handler que el botón de
+  texto).
+- **El buscador** arranca colapsado a un ícono de lupa. Al tocarlo,
+  `.search-box` se expande con `position: absolute` (transición de
+  `max-width`, no de `display`, para poder animarla) mientras "+ Crear" y
+  el ícono de filas se desvanecen con opacity — se colapsa con el botón ✕
+  de adentro, `Escape` o tocando afuera.
+- **El selector de filas por página** es un menú contextual (ícono + "N
+  filas" + ▾), no un `<select>` nativo — el `<select>` real sigue en el DOM
+  pero oculto, como fuente de verdad para `grid.js`.
+
+Dos bugs reales para quien toque esto de nuevo: (1) `overflow:hidden` en un
+wrapper recorta cualquier panel absoluto que se abra adentro, sin importar
+el `z-index` — el colapso animado tiene que vivir en el elemento visible
+(el botón), no en el contenedor que también aloja el panel. (2) un wrapper
+`position:relative` sin `pointer-events:none` propio pinta por encima de
+contenido `position:absolute` anterior en el HTML y se queda con los clics
+de esa zona en silencio, aunque no tenga contenido visible propio.
+
 ## Bloqueo de campos en el subgrid (`LockedFields`) y valores por defecto
 
 El mini-modal de subgrid bloquea ciertos campos con `lockField(field)` en vez
@@ -213,6 +257,11 @@ Ver la tabla "Flags leídos por convención de nombre" en la página de
 `UiMetadata.Contracts` — son los mismos 4 flags (`CanOpenModal`,
 `CanDeleteRow`, `CanRowAction`, `IsInactiveRow`), y `RowClickAction`/
 `DetailsButtonAction` de `GridConfig`.
+
+`--grid-control-h` (2.75rem) es el alto compartido por todos los controles
+de la barra superior del grid (buscador, menú de filas, "+ Crear" y sus
+versiones ícono en mobile) — un control nuevo en esa barra debería usar
+este token en vez de un alto propio.
 
 ## Design tokens (`--grid-*`, `wwwroot/css/grid.css`)
 
