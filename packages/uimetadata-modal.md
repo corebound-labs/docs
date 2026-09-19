@@ -86,6 +86,8 @@ en el layout, el contenedor de toasts:
 </div>
 ```
 
+> **CSP:** `CancelOnClick`, `SaveOnClick` y `ClearButtonOnClick` se emiten como `data-ui-onclick` (no como atributo `onclick`), que ejecuta el listener delegado de `UiMetadata.Elements` — el valor sigue siendo `funcionGlobal(args)`, sin `eval`, así que funciona con una Content-Security-Policy sin `unsafe-inline`. Solo se admiten llamadas simples; ver "Handlers declarativos" en el README de Elements.
+
 ```js
 openModal("myModal");
 closeModal("myModal");

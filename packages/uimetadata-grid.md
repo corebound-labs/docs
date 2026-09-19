@@ -399,3 +399,7 @@ atómicos con evidencia real de duplicación (`Elements`/`Modal`), dejando
 `UiMetadata.Contracts` (atributos), `UiMetadata.Elements` y `UiMetadata.Modal`
 (chrome de controles atómicos y ciclo de vida del modal) — las tres se
 registran en cascada con `.AddUiMetadataGrid()`.
+
+## Content-Security-Policy
+
+Los botones y controles de `_Grid`/`_GridControls` (crear, importar, buscar, filas por página, acciones de fila, "mostrar inactivas") se emiten con `data-ui-onclick`/`data-ui-onchange` en vez de atributos `onclick`/`onchange`, así que **funcionan con una CSP sin `unsafe-inline` en `script-src`**. El listener que los ejecuta vive en `UiMetadata.Elements` (`elements.js`), que ya carga `_UiMetadataScripts.cshtml`. `GridRowAction.JsCallback` y `ActionButtonModel.OnClick` siguen recibiendo el mismo string `funcion(args)`. El `<script>` en línea de `_GridEntityConfig.cshtml` recibe su nonce por el `CspNonceTagHelper` de Elements (este paquete trae su propio `Views/_ViewImports.cshtml` con `@addTagHelper *, UiMetadata.Elements`); ver "Handlers declarativos" en el README de Elements.
