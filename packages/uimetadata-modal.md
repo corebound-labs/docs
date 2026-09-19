@@ -272,3 +272,15 @@ Enter (confirma), o clic fuera del modal (cancela).
 
 Ninguna de otro paquete `UiMetadata.*` (funciona standalone), aunque
 `UiMetadata.Grid`/`UiMetadata.Charts` lo consumen como dependencia dura.
+
+## Botón de acción destructiva (`.danger-btn`)
+
+Junto a `.cancel-btn` y `.save-btn`: contorno rojo que se rellena al pasar el ratón, para
+acciones como bloquear, eliminar o salir de algo. Es solo una clase:
+
+```html
+<button type="button" class="danger-btn" data-ui-onclick="blockUser('id')">Bloquear</button>
+```
+
+El color sale de `--grid-btn-danger-bg` (el mismo token de los botones de borrado del grid,
+que el consumidor conecta a su color de peligro).
