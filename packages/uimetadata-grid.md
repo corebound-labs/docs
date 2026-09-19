@@ -403,3 +403,44 @@ registran en cascada con `.AddUiMetadataGrid()`.
 ## Content-Security-Policy
 
 Los botones y controles de `_Grid`/`_GridControls` (crear, importar, buscar, filas por página, acciones de fila, "mostrar inactivas") se emiten con `data-ui-onclick`/`data-ui-onchange` en vez de atributos `onclick`/`onchange`, así que **funcionan con una CSP sin `unsafe-inline` en `script-src`**. El listener que los ejecuta vive en `UiMetadata.Elements` (`elements.js`), que ya carga `_UiMetadataScripts.cshtml`. `GridRowAction.JsCallback` y `ActionButtonModel.OnClick` siguen recibiendo el mismo string `funcion(args)`. El `<script>` en línea de `_GridEntityConfig.cshtml` recibe su nonce por el `CspNonceTagHelper` de Elements (este paquete trae su propio `Views/_ViewImports.cshtml` con `@addTagHelper *, UiMetadata.Elements`); ver "Handlers declarativos" en el README de Elements.
+
+## Errores del servidor en el modal de guardado
+
+Si el POST de guardado responde con error, `showErrors` pinta los mensajes en el `modalErrors_{Entidad}` del modal. Lee, por este orden, `errors` (lista), `message` o `error` — este último es la forma en que los endpoints JSON de EcoTrack devuelven un error de negocio (`{ success: false, error }`). Antes solo miraba `errors` y `message`, así que esos errores no se veían (por ejemplo, el aviso de límite del plan alcanzado).
+
+## Barra de filtros desplegables (`_GridFilters.cshtml`)
+
+Filtros tipo "Rol / Plan / Estado" sobre un grid, sin escribir el JS a mano. Cada
+cambio recarga ese grid con `loadEntity(LoadAction, GridContainerId, { filtros })`;
+los filtros viajan en el cuerpo JSON del POST (solo los que tienen valor) y
+`refreshGrid` los conserva tras guardar o borrar.
+
+```csharp
+@await Html.PartialAsync("~/Views/Shared/_GridFilters.cshtml", new UiMetadata.Grid.Models.GridFiltersModel
+{
+    Id = "usersFilters",
+    GridContainerId = "users-grid",   // el .partial-container que se recarga
+    LoadAction = "UserList",          // la acción que resuelve "Dummy" en loadEntityUrl
+    Filters =
+    [
+        new() { Key = "role", Label = "Rol", Options = [new() { Id = "Admin", Name = "Admin" }] },
+        new() { Key = "planId", Label = "Plan", ValueType = GridFilterValueType.Number, Options = planOptions },
+        new() { Key = "isTest", Label = "Test", AllText = "Todas", ValueType = GridFilterValueType.Boolean,
+                Options = [new() { Id = "true", Name = "Solo test" }, new() { Id = "false", Name = "Sin test" }] }
+    ]
+})
+```
+
+- `Key` es el nombre del parámetro en el cuerpo JSON. `ValueType` (`Text` por defecto,
+  `Number`, `Boolean`) decide cómo se tipa: `"2"` viaja como `2`, `"true"` como `true`.
+- Siempre hay una opción "sin filtrar" (`AllText`, por defecto "Todos"): su valor es
+  vacío y ese filtro no se envía.
+- La primera carga la hace la vista: `applyGridFilters(document.getElementById("usersFilters"))`
+  (acepta la barra o cualquier elemento dentro de ella).
+- El backend recibe un objeto con esas claves (`[FromBody] record UserListRequest(string? Role, byte? PlanId, bool? IsTest)`).
+- Los `<select>` llevan `appearance: none` y color/fondo explícitos en `<option>` (mismo
+  tratamiento que los select de `.right-controls` y del modal): sin eso el desplegable abierto
+  usa el chrome del sistema y, en tema oscuro, queda texto blanco sobre fondo blanco.
+  Tokens: `--grid-input-bg`, `--grid-border-input`, `--grid-select-option-bg`, `--grid-text-main`.
+- Modelo: `GridFiltersModel`/`GridFilterModel` (`UiMetadata.Grid.Models`); reutiliza `SelectOption`
+  de `UiMetadata.Elements`.
