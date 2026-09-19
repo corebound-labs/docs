@@ -134,6 +134,74 @@ const btn = createActionButton({ cssClass: "btn-action", text: "📥", onClick: 
   <div style="margin-top:.6rem;"><code class="dd-out" id="dd-action-out">(click un botón)</code></div>
 </div>
 
+## Handlers declarativos (`data-ui-onclick`) y Content-Security-Policy
+
+Con una CSP sin `'unsafe-inline'` en `script-src`, el navegador **bloquea todo
+atributo `onclick="..."` / `onchange="..."` / `oninput="..."`** (y todo `<script>`
+en línea sin nonce). Por eso los componentes del paquete ya no emiten atributos
+`onXXX`: emiten `data-ui-onclick`, `data-ui-onchange` o `data-ui-oninput`, y un
+único listener delegado en `elements.js` los ejecuta.
+
+```html
+<a data-ui-onclick="miHandler('id-1', 3, this)">…</a>
+<input type="checkbox" data-ui-onchange="toggleAlgo('x', this.checked)" />
+```
+
+- El valor usa el **mismo formato de siempre**, `funcion(args)`: por eso
+  `ActionButtonModel.OnClick`, `ModalActionsModel.CancelOnClick/SaveOnClick`,
+  `ClearButtonOnClick` y `GridRowAction` siguen recibiendo el mismo string y **no
+  hay que cambiar ningún call site**. La función tiene que ser global
+  (`window.miHandler`), también con ruta (`App.ui.abrir(...)`).
+- **No se usa `eval`** (tampoco lo permite la CSP): la expresión se interpreta con un
+  mini-analizador que solo entiende `nombre(args)` con argumentos literales
+  (`'texto'`, `"texto"`, `12`, `-1.5`, `true`, `false`, `null`) y las referencias
+  `this` (el elemento con el atributo), `event` y sus propiedades (`this.checked`,
+  `this.value`, `event.target`). Cualquier otra cosa (`if (...)`, `a.b().c()`,
+  varias sentencias) se ignora con un `console.error`, no se ejecuta: hay que
+  moverla a una función con nombre. Ej.: `closeChartModalOnBackdrop(event, this)` en
+  vez de `if (event.target === event.currentTarget) closeChartModal()` (el listener
+  delegado no tiene `currentTarget`, por eso `this` se pasa como argumento).
+- Conserva la semántica del inline: se ejecutan también los de los ancestros (de
+  adentro hacia afuera), y si un handler llama `event.stopPropagation()` no siguen ni
+  los ancestros ni los demás listeners de `document` (ej. el clic de fila de
+  `grid.js`), tal como pasaba con el `onclick` en línea.
+- `button.onclick = fn` asignado **desde JS** no lo bloquea la CSP (solo los
+  atributos); no hace falta migrarlo. Sí hay que migrar los `onclick="..."` dentro de
+  strings HTML armados en JS (`innerHTML = \`<button onclick=…>\``).
+
+### Nonce para `<script>` en línea: `CspNonceTagHelper`
+
+`UiMetadata.Elements.TagHelpers.CspNonceTagHelper` agrega `nonce="..."` a todo
+`<script>` en línea (sin `src`) de las vistas. El paquete **no genera el nonce ni la
+cabecera CSP** (mismo criterio que `window.uiMetadataFetch`: el RCL da el punto de
+extensión, la app decide la política): el consumidor genera un valor por petición y
+lo deja en `HttpContext.Items[CspNonceTagHelper.HttpContextItemKey]`.
+
+```csharp
+// Program.cs — middleware, antes de UseStaticFiles
+app.Use(async (context, next) =>
+{
+    var nonce = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
+    context.Items[CspNonceTagHelper.HttpContextItemKey] = nonce;
+    context.Response.Headers["Content-Security-Policy"] =
+        $"default-src 'self'; script-src 'self' 'nonce-{nonce}'; script-src-attr 'none'; …";
+    await next();
+});
+```
+
+```cshtml
+@* _ViewImports.cshtml de la app y de cada RCL con <script> en línea (ej. UiMetadata.Grid) *@
+@addTagHelper *, UiMetadata.Elements
+```
+
+Sin valor en `Items` (consumidor sin CSP) el helper no toca el tag: es inocuo si no se
+usa. Un `<script src="...">` no lleva nonce (lo autoriza `'self'` o el CDN de la
+política).
+
+`syncSliderValue(targetId, source)` y `submitFormById(formId)` (`elements.js`)
+son las dos funciones que reemplazan a los únicos `onclick`/`oninput` del paquete
+que no eran una llamada simple.
+
 ## Inputs simples
 
 ```csharp

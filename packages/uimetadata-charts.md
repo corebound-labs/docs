@@ -77,7 +77,7 @@ charts.forEach(c => renderChart(c, `#${c.id}`));
 
 `ChartCardModel.Id` tiene que coincidir con el `Id` que devuelve tu backend
 para ese chart — es la clave que conecta la tarjeta con `renderChart`. El
-botón "expandir" ya viene cableado (`onclick="openChartModal('Id')"`) —
+botón "expandir" ya viene cableado (`data-ui-onclick="openChartModal('Id')"`) —
 no hace falta ningún setup de JS aparte.
 
 **Demo en vivo** — un chart `area` real, renderizado con ApexCharts (cargado
