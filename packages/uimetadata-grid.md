@@ -47,7 +47,12 @@ builder.Services.AddControllersWithViews()
 ```
 
 `_UiMetadataScripts.cshtml` ya incluye el `_ToastContainer` (una sola vez
-por página) y carga toast/confirm/elements/grid en el orden correcto.
+por página) y carga toast/confirm/elements/grid en el orden correcto —
+también [flatpickr](https://flatpickr.js.org/) (CDN, versión/`integrity`
+fijas), que reemplaza al `<input type="date">` nativo en cualquier campo de
+fecha (ver página de Elements, `_DateInput.cshtml`). Global, no opt-in por
+página como `UiMetadata.Charts` — cualquier grid con un campo de fecha lo
+usa.
 
 > ⚠️ **`toast.js` y `confirm.js` de `UiMetadata.Modal` son una dependencia
 > de runtime real de `grid.js`, no solo chrome opcional**: `grid.js` llama
@@ -123,6 +128,16 @@ compilación — un typo no se detecta antes de correr la página, pero si el
 backend no encuentra la acción, `openEntityModal`/`loadEntity` fallan con
 un `toastError`/404 visible, no en silencio.
 
+## Fix: `DateOnly` sin padear y celdas vacías sin ninguna señal
+
+`_Grid.cshtml` solo tenía un caso especial para `DateTime` (`dd/MM/yyyy`) —
+`DateOnly` caía al genérico y se veía sin ceros a la izquierda ("1/1/2023").
+Ahora tiene su propio caso, mismo formato. De paso, un valor `null`/vacío
+en cualquier columna muestra un placeholder "—" (`.table-cell-empty`) en
+vez de una celda en blanco sin ninguna señal — sin configuración, aplica a
+cualquier columna que no tenga ya su propio renderer (bool/badge/sign
+indicator).
+
 ## Buscador: filtrar por columna (una o varias a la vez)
 
 Por defecto el buscador (`_GridControls.cshtml`) matchea contra el texto
@@ -160,6 +175,49 @@ orden.
 (ej. `AmountFormatted`, texto tipo "1.234,56 €") ordena como texto, no
 numéricamente — puede dar un orden raro entre montos de distinta cantidad
 de dígitos. No hay ningún atributo `[SortKey]` para resolverlo hoy.
+
+### `[DefaultSort]` — orden inicial
+
+```csharp
+[DefaultSort(Descending = true)]
+public DateOnly TransactionDate { get; set; }
+```
+
+El grid arranca ordenado por esa columna (mismo comparador de arriba) en
+vez del orden del backend, con el header ya marcado ▲/▼ desde el primer
+render. Sin `[DefaultSort]` en el ViewModel, el grid se comporta
+exactamente como antes.
+
+## Íconos de signo en columnas de importe (`[SignIndicatorField]`)
+
+```csharp
+[SignIndicatorField(nameof(Amount))]
+public string AmountFormatted { get; set; }
+```
+
+Antepone ▲ verde (positivo/cero) o ▼ roja (negativo) a la celda
+(`_SignIndicator.cshtml`, mismos tokens que `[BoolIcon]`). El argumento es
+el nombre de OTRA propiedad del ViewModel de la que leer el signo real —
+necesario cuando la columna visible es un valor ya formateado (como acá,
+`AmountFormatted` vs. el `Amount` decimal crudo). Sin argumento, usa el
+valor de la propia columna.
+
+## Fix: guardar/editar ya no recarga toda la página (y por fin se ve el toast)
+
+`submitModalForm` hacía `location.reload()` al guardar con éxito —
+navegación completa de la página. Dos problemas reales: cualquier toast de
+éxito quedaba tapado por la navegación (de hecho no había ningún
+`toastSuccess` en absoluto, se agregó), y se perdía todo el estado de la
+tabla (orden/búsqueda/página/filas por página).
+
+Ahora `loadEntity` cachea cómo cargó cada grid (`gridLoadCache`) y
+`refreshGrid(containerId)` reusa esa cache para recargar **solo esa
+tabla**, ubicando el `containerId` correcto desde el `<form>` hasta su
+`.partial-container` más cercano. `gridUiStateCache` guarda
+orden/búsqueda/página/filas por página por grid y las restaura al volver a
+cargar — gana sobre `[DefaultSort]`, por ser una elección más reciente y
+explícita del usuario. Corrige el flujo de cualquier grid: es el único
+punto de guardado que usa todo el paquete.
 
 ## Barra de controles en mobile: buscador colapsable, menú de filas, "+ Crear" como ícono
 
@@ -233,15 +291,38 @@ Sin ningún `[GridPriority]`, nada de esto se activa. **Limitación conocida**:
 un cambio de ancho del contenedor sin `resize` de ventana (ej. colapsar el
 sidebar en desktop) no re-adapta las columnas hasta el próximo resize.
 
+## Clonar fila (`GridConfig.GridCloneEnabled`)
+
+`config.GridCloneEnabled = true` agrega un botón 📋 por fila, entre editar y
+eliminar: abre el modal precargado con los datos de esa fila pero **siempre
+crea un registro nuevo al guardar**, nunca sobreescribe la original. Off por
+defecto.
+
+```csharp
+var config = GridConfigBuilder.Build<TransactionViewModel>(fkOptions);
+config.GridCloneEnabled = true;
+```
+
+- 100% front: el backend recibe el mismo POST de "crear" de siempre (sin
+  `Id`) — no hace falta ningún endpoint ni cambio en el handler de guardado.
+- `handleGridCloneClick` → `openGridRowModal(row, isClone = true)` hace el
+  mismo `fillModalForm` que "Editar" y luego vacía el input `Id` — el
+  listener de `submit` decide crear vs. editar solo mirando si ese input
+  tiene valor, así que basta con eso.
+- Título del modal → "Clonar {Entidad}"; `LockedFields`/`HiddenFields`/
+  `IsReadOnlyRow` de la fila original no se aplican (es un alta nueva, con
+  los mismos permisos que "Crear"). Gated por `CanOpenModal`, igual que
+  editar.
+
 ## Acciones compactas en móvil (menú contextual)
 
-Debajo de 599px de viewport, las columnas de acción (editar/ver, eliminar,
-acción custom de `GridConfig.RowAction`) se reemplazan por una sola columna
-de 44px: un botón `⋮` con menú contextual si la fila tiene 2+ acciones, la
-acción directa si tiene una sola, o nada si no tiene ninguna.
+Debajo de 599px de viewport, las columnas de acción (editar/ver, clonar,
+eliminar, acción custom de `GridConfig.RowAction`) se reemplazan por una sola
+columna de 44px: un botón `⋮` con menú contextual si la fila tiene 2+
+acciones, la acción directa si tiene una sola, o nada si no tiene ninguna.
 
 - Sin configuración: el menú se arma con los botones ya renderizados en la
-  fila (`data-field="__details"`/`"__delete"`/`"__rowaction"`), así que los
+  fila (`data-field="__details"`/`"__clone"`/`"__delete"`/`"__rowaction"`), así que los
   permisos por fila se respetan solos y cada opción dispara el botón original
   (mismos handlers, mismo `confirmDialog`).
 - El texto de cada opción es el `title` del botón (`"Editar"`, `"Ver detalle"`,
