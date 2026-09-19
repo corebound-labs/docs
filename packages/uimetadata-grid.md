@@ -156,6 +156,9 @@ empiezan marcadas; "todas marcadas" y "ninguna marcada" se tratan igual
 (buscar en toda la fila). `SearchableFields = null` (default) = sin
 dropdown, buscador de siempre.
 
+**Limpiar búsqueda**: botón ✕ (`.search-clear`, solo visible con texto) y
+`Escape` en el input vacían el buscador y devuelven el foco.
+
 ## Orden por columna (click en el header, "como Excel")
 
 Cualquier header de columna con datos reales (no las de acción, ni la
@@ -214,10 +217,21 @@ Ahora `loadEntity` cachea cómo cargó cada grid (`gridLoadCache`) y
 `refreshGrid(containerId)` reusa esa cache para recargar **solo esa
 tabla**, ubicando el `containerId` correcto desde el `<form>` hasta su
 `.partial-container` más cercano. `gridUiStateCache` guarda
-orden/búsqueda/página/filas por página por grid y las restaura al volver a
-cargar — gana sobre `[DefaultSort]`, por ser una elección más reciente y
-explícita del usuario. Corrige el flujo de cualquier grid: es el único
+orden/búsqueda/página/filas por página/columnas de búsqueda marcadas y las
+restaura al volver a cargar — gana sobre `[DefaultSort]`, por ser una elección
+más reciente y explícita del usuario. La clave es el id del
+`.partial-container` (estable), no `gridId`, que lleva un GUID nuevo por
+render y hacía que el estado nunca se encontrara tras refrescar. Corrige el flujo de cualquier grid: es el único
 punto de guardado que usa todo el paquete.
+
+## Tipografía de tabla en mobile (≤599px)
+
+Cabecera a `0.78rem`, filas a `0.82rem`, íconos de orden/signo más chicos: en
+iPhone 13 mini (375px) / 14 Pro (390px) cada columna mide ~76-81px y
+`Descripción` + su ícono se recortaba por ambos lados (`overflow: hidden` sobre
+un flex centrado). Ahora usa `justify-content: safe center`. Grids con muchas
+columnas deben marcar las prescindibles con `[GridPriority]`; sin prioridades,
+13 columnas se apretaban a ~17px cada una.
 
 ## Barra de controles en mobile: buscador colapsable, menú de filas, "+ Crear" como ícono
 
