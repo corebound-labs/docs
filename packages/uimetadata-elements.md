@@ -114,8 +114,8 @@ builder.Services.AddControllersWithViews()
 ```
 
 Presets: `ActionButtonModel.Edit(onClick, extraCssClass?, title?)`,
-`.Delete(...)`, `.Add(onClick, title?)`. Para un botón que no encaja en
-ningún preset se sigue construyendo el modelo directamente.
+`.Delete(...)`, `.Clone(...)`, `.Add(onClick, title?)`. Para un botón que no
+encaja en ningún preset se sigue construyendo el modelo directamente.
 
 Mismo componente desde JS (usado por subgrids que añaden filas dinámicas):
 
@@ -143,8 +143,75 @@ const btn = createActionButton({ cssClass: "btn-action", text: "📥", onClick: 
 })
 ```
 
-`_TextInput.cshtml` / `_NumberInput.cshtml` / `_DateInput.cshtml`, todos
-sobre el mismo `SimpleInputModel`.
+`_TextInput.cshtml` / `_NumberInput.cshtml` / `_DateInput.cshtml` /
+`_TextAreaInput.cshtml`, todos sobre el mismo `SimpleInputModel`
+(`_TextAreaInput` usa además `Rows`, default 3). Los tres primeros llevan
+`autocomplete="off"` fijo.
+
+### `_NumberInput.cshtml` — decimal regionalizado, no `<input type="number">` nativo
+
+`type="number"` nativo siempre usa `.` como decimal sin importar el idioma
+del navegador — un usuario en español no podía tipear `1931,25` ni pegar
+`1.931,25 €` sin que se destrozara (`1.93125`). Ahora es
+`<input type="text" class="ui-number-input">`; `initNumberInputs()`
+(`elements.js`) muestra/acepta el valor en el formato de la región del
+navegador (`Intl.NumberFormat`). El valor que viaja en el submit sigue
+siendo invariante (`.` decimal) — se convierte al armar el `FormData`
+(`grid.js`), así que el backend no cambia.
+
+Al pegar, si aparecen `,` y `.`, el de más a la derecha es el decimal
+(funciona con cualquier formato regional, pegue lo que pegue el usuario).
+Con un solo separador, se compara contra el separador de miles real de la
+región para no confundir "1.500" (mil quinientos) con "1,5". Para setear
+el valor por JS, `syncNumberInputValue(field, invariantValue)` en vez de
+`field.value = ...`.
+
+**Símbolo de moneda opt-in** vía `[CurrencyField(Symbol = "€")]`
+(`UiMetadata.Contracts`) — prefijo puramente visual dentro del input, superpuesto
+con CSS (`.ui-number-input-wrapper`), nunca forma parte del valor que viaja
+en el submit. Sin el atributo, el `<input>` se renderiza suelto como antes.
+
+### `_TextAreaInput.cshtml` — opt-in vía `[TextAreaField]`
+
+Cualquier propiedad `string` del ViewModel marcada `[TextAreaField(Rows = 5)]`
+(`UiMetadata.Contracts`) se renderiza como `<textarea>` en vez de
+`<input type="text">`. Sin el atributo, sigue siendo `_TextInput.cshtml`
+como siempre; en un tipo que no sea `string` se ignora en silencio (mismo
+criterio que `[SliderField]`).
+
+### `_DateInput.cshtml` — flatpickr, no `<input type="date">` nativo
+
+El picker nativo de `type="date"` no se puede tematizar (vive fuera del
+DOM) — en dark mode queda un calendario blanco de fábrica. El input real es
+`<input type="text" class="ui-date-input">`; `initDateInputs()`
+(`elements.js`) le engancha [flatpickr](https://flatpickr.js.org/), tema
+oscuro en `elements.css`.
+
+Dependencia real de runtime (no opcional, a diferencia de
+`UiMetadata.Charts`): flatpickr se carga global vía
+`_UiMetadataStyles.cshtml`/`_UiMetadataScripts.cshtml` porque cualquier
+grid con un campo de fecha lo usa. `altInput: true` mantiene el valor ISO
+real (`Y-m-d`) en el input oculto que viaja en el submit, mostrando
+`d/m/Y` al usuario en un input separado. Para setear el valor por JS sin
+desincronizar ese alt input, usar `syncDateInputValue(field, isoValue)` en
+vez de `field.value = ...` — es lo que usa `UiMetadata.Modal` en
+`fillModalForm`/`clearModalForm`. `data-min-today="true"` en el input
+equivale a `minDate: "today"`.
+
+`allowInput: true` deja tipear/pegar directo en el input visible, no solo
+elegir del calendario — `parseLocalizedDate` (`elements.js`) acepta ISO
+(`2023-08-31`) además de `d/m/y` con `-`/`.`/`/`, más flexible que el
+`altFormat` estricto que flatpickr reconoce solo. Un formato no válido
+revierte al valor anterior con un `toastWarning`.
+
+**Navegación rápida de mes y año**: el `<select>` nativo de mes tiene un popup
+del sistema operativo que no se puede tematizar (en Chrome/Windows queda
+blanco). Se usa `monthSelectorType: "static"` y `attachCustomMonthDropdown(fp)`
+(`elements.js`) engancha menús propios: clic en el mes → los 12 meses, clic en
+el año → lista de años (rango de `minDate`/`maxDate` si existen, si no −80/+10).
+Sirve también para pickers con `showMonths > 1` (rango del dashboard). Además el
+header queda centrado con texto blanco, y el calendario acompaña al campo cuando
+se scrollea el modal (`onOpen`/`onClose` reposicionan con el scroll interno).
 
 ## Slider (range input)
 

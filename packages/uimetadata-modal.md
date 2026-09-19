@@ -146,7 +146,11 @@ fillModalForm("MyEntity", { Name: "...", Amount: 42 }); // llenar para editar
 `openFormModal`/`fillModalForm` llaman opcionalmente a funciones de
 Subgrid/cascada (`initCascadeListeners`, `addSubObjectRow`, etc.) **solo si
 existen** — un modal simple sin subgrids ni selects en cascada funciona
-perfecto sin `UiMetadata.Grid` cargado en absoluto.
+perfecto sin `UiMetadata.Grid` cargado en absoluto. Mismo criterio con
+`syncDateInputValue` (`UiMetadata.Elements`): `fillModalForm`/
+`clearModalForm` la usan para actualizar un campo `.ui-date-input`
+(flatpickr) sin pisar su `.value` a mano — ver página de Elements,
+`_DateInput.cshtml`.
 
 ## Fetch propio: `openEntityModal` (opt-in, sin cambios de backend requeridos)
 

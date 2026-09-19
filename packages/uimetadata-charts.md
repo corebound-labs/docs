@@ -151,7 +151,9 @@ válida de opciones de ApexCharts) sobre las opciones base que arma según
 `colors` explícito. Para el `total.label` del centro de un chart `donut`
 (texto libre, ej. "Ahorro"), pasá `donutTotalLabel` en `Options` — el motor
 no tiene ningún texto de negocio hardcodeado, sin esto cae al genérico
-`"Total"`.
+`"Total"`. `donutTotalValue` (texto libre) reemplaza el valor del centro, que
+por defecto es el % del primer valor sobre el total. Un donut no puede
+dibujar valores negativos: el backend debe mandar los datos en positivo.
 
 ## Archivos a tocar/crear al integrarlo en un proyecto nuevo
 
