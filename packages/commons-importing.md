@@ -1,8 +1,7 @@
 # Commons.Importing
 
 Lectura e interpretación de archivos tabulares (CSV, XLS, XLSX) exportados por bancos u otras apps. No depende de
-ningún dominio: devuelve filas ya tipadas y cada aplicación decide qué hacer con ellas. Lo usa la
-[importación de transacciones de EcoTrack](../importing-transactions.md).
+ningún dominio: devuelve filas ya tipadas y cada aplicación decide qué hacer con ellas.
 
 ## Flujo
 

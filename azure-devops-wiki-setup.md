@@ -70,3 +70,9 @@ actualiza la página automáticamente, sin repetir el paso 2.
 - Automatizar el mirror/sincronización entre el repo de GitHub y el de
   Azure Repos (un pipeline que sincronice cambios de un lado al otro) — no
   se pidió en esta spec; si hace falta a futuro, es una spec aparte.
+
+## Nota: carpetas `packages/` y `ecotrack/`
+
+El sitio ahora tiene dos áreas: `packages/` (librerías) y `ecotrack/` (guías de
+la aplicación). Para la wiki de Azure DevOps podés publicar ambas carpetas; los
+enlaces entre ellas son relativos (`../packages/...`, `../ecotrack/...`).

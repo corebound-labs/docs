@@ -58,20 +58,14 @@ inmediata al arrancar, el scope por corrida y el manejo de excepciones ya
 están resueltos en la clase base. `interval` tiene un piso de 1 minuto — un
 valor menor se redondea a `TimeSpan.FromMinutes(1)`.
 
-## Ejemplo real en EcoTrack
+## Cuándo conviene
 
-`EcoTrack.Infrastructure/BackgroundJobs/ScheduledTransactionProcessor.cs`
-procesa las plantillas de transacciones recurrentes: el intervalo viene de
-`ScheduledTransactionsOptions.PollingIntervalMinutes`, y `RunOnceAsync`
-resuelve `IProcessScheduledTransactionsHandler` desde el scope. Registrado
-con `services.AddHostedService<ScheduledTransactionProcessor>()` en
-`EcoTrack.Infrastructure/DependencyInjection.cs`.
-
-Por qué no una tarea externa de SO: en hosting compartido el app pool se
-recicla por inactividad, lo que no convive bien con una tarea separada. El
-catch-up del handler cubre el hueco de tiempo al reiniciar, con un tope de
-seguridad (`MaxCatchUpOccurrences`) para no generar de golpe transacciones
-atrasadas si el proceso estuvo caído mucho tiempo.
+Sirve para tareas periódicas que viven en el mismo proceso de la app
+(procesar plantillas recurrentes, purgar logs, sincronizar datos). Por qué no
+una tarea externa de SO: en hosting compartido el app pool se recicla por
+inactividad. La corrida inmediata al arrancar cubre el hueco tras un
+reinicio, así que el job debe ser idempotente y, si acumula trabajo
+atrasado, ponerse un tope de seguridad para no procesarlo todo de golpe.
 
 ## Dependencias
 

@@ -28,17 +28,15 @@ registra una vez y captura todo el pipeline.
 app.UseExceptionHandling();
 ```
 
-Esta única línea es **todo lo que EcoTrack usa hoy** — el resto (alertas,
-logging de llamadas a BD) es opcional y no está registrado en este repo
-(confirmado por grep completo — ningún otro método de `ServiceCollectionExtensions`
-de este paquete se llama en ningún lado).
+Esta única línea es lo mínimo necesario — el resto (alertas,
+logging de llamadas a BD) es opcional.
 
 ## Ejemplo mínimo de uso
 
 ```csharp
-public class SaveAccountHandler
+public class SaveProductHandler
 {
-    public async Task HandleAsync(SaveAccountCommand command)
+    public async Task HandleAsync(SaveProductCommand command)
     {
         if (command.Name is null)
             throw new BaseException("El nombre es obligatorio."); // → 400, no 500
@@ -71,7 +69,7 @@ Es la única señal que el middleware usa para decidir 400 vs 500 — cualquier
 excepción de negocio visible al usuario debe ser (o heredar de)
 `BaseException`; todo lo demás cae a 500 genérico.
 
-## Errores no fatales / alertas (opcional, no usado hoy en EcoTrack)
+## Errores no fatales / alertas (opcional)
 
 ```csharp
 public class SlackAlertService : IAlertService
@@ -89,7 +87,7 @@ reescribe el status a `222` (`CustomHttpStatusCodes.OkWithErrors`) y
 procesa los errores en background (`AlertBackgroundService`, un
 `Channel<List<ErrorResponse>>` sin límite) sin bloquear la respuesta.
 
-## Logging de llamadas en BD (opcional, no usado hoy en EcoTrack)
+## Logging de llamadas en BD (opcional)
 
 ```csharp
 services.AddErrorResponseDbLogging(connectionString, opts =>
@@ -107,7 +105,7 @@ public IActionResult MyAction() { ... }
 Cada llamada queda en `LOG__LogExceptionHandler` (`Id, CallTime, Endpoint,
 StatusCode, IsNotified`) — la tabla se crea sola al arrancar si no existe.
 Este branch del middleware se salta en silencio si no hay ningún
-`ExceptionHandlerDbContext` registrado (el caso actual de EcoTrack).
+`ExceptionHandlerDbContext` registrado (el caso por defecto).
 
 ## `CorrelationId` (integración opcional con `Commons.Logging`)
 

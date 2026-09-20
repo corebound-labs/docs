@@ -23,7 +23,7 @@ entidad.
 ```
 
 ```csharp
-services.AddCommonRepositoryCrud<EcoTrackDbContext>();
+services.AddCommonRepositoryCrud<AppDbContext>();
 ```
 
 Registra `ICommonRepository → CommonRepository<TDbContext>` (Scoped) e
@@ -32,15 +32,14 @@ Registra `ICommonRepository → CommonRepository<TDbContext>` (Scoped) e
 ## Ejemplo mínimo de uso
 
 ```csharp
-public class GetAccountByIdHandler(ICommonRepository repo)
+public class GetOrderByIdHandler(ICommonRepository repo)
 {
-    public async Task<Account?> HandleAsync(Guid id) =>
-        await repo.FindAsync<Account>(a => a.Id == id, nameof(Account.AccountParticipants));
+    public async Task<Order?> HandleAsync(Guid id) =>
+        await repo.FindAsync<Order>(o => o.Id == id, nameof(Order.Lines));
 }
 ```
 
-Patrón usado por ~30+ Handlers de `EcoTrack.Application` — inyección
-directa, sin capa intermedia.
+Inyección directa del repositorio en el Handler/Service, sin capa intermedia.
 
 ## Archivos a tocar/crear al integrarlo en un proyecto nuevo
 
@@ -65,9 +64,8 @@ directa, sin capa intermedia.
 
 `ICommonService`/`CommonService` (façade DTO-aware sobre `ICommonRepository`
 + Mapster, con overloads `GetById<T,TKey,TDto>`/`GetAll<T,TDto>`/
-`UpsertEntity<T,TKey,TDto>`) también existen en el paquete, pero **no
-tienen ningún consumidor en el repo actual** de EcoTrack — todos los
-Handlers usan `ICommonRepository` directo.
+`UpsertEntity<T,TKey,TDto>`) también existen en el paquete, pero son
+opcionales: se puede usar solo `ICommonRepository` directo.
 
 ## `splitQuery` (opcional, default `false`)
 
@@ -76,18 +74,18 @@ Las sobrecargas de `LoadAsync`/`FindAsync`/`GetListAsync` que reciben
 también `bool splitQuery = false`, justo antes de `includes`:
 
 ```csharp
-await repo.GetListAsync<Transaction>(
-    t => relevantIds.Contains(t.Id),
+await repo.GetListAsync<Order>(
+    o => relevantIds.Contains(o.Id),
     TrackingMode.Tracking,
     splitQuery: true,
-    $"{nameof(Transaction.TransactionParticipants)}.{nameof(TransactionParticipant.Participant)}",
-    $"{nameof(Transaction.Wallet)}.{nameof(Wallet.WalletParticipants)}");
+    $"{nameof(Order.Lines)}.{nameof(OrderLine.Product)}",
+    $"{nameof(Order.Customer)}.{nameof(Customer.Addresses)}");
 ```
 
 Traduce a `AsSplitQuery()` de EF Core: cada `Include` de colección se
 resuelve como una query `SELECT` separada en vez de un único `JOIN`. Sin
 esto, incluir más de una colección a la vez (como el ejemplo — dos
-colecciones distintas, `TransactionParticipants` y `Wallet.WalletParticipants`)
+colecciones distintas, `Lines` y `Customer.Addresses`)
 produce el producto cartesiano de ambas por cada fila raíz — EF Core lo
 loguea como warning (`MultipleCollectionIncludeWarning`).
 
@@ -138,13 +136,12 @@ Handler/ViewModel sabe que el campo está cifrado. Se instancia a mano en
 
 ```csharp
 var converter = new EncryptedStringConverter(_fieldEncryptor);
-modelBuilder.Entity<Card>().Property(c => c.Last4Digits).HasConversion(converter);
+modelBuilder.Entity<Customer>().Property(c => c.TaxId).HasConversion(converter);
 ```
 
 Tipado como no-nullable a propósito — EF Core nunca invoca el converter
 para un valor CLR `null` en una propiedad `string?`, así que el mismo
-converter sirve tanto para campos nullable como no-nullable. En EcoTrack se
-usa en `Card.Last4Digits`/`Transaction.Description`.
+converter sirve tanto para campos nullable como no-nullable.
 
 ## Dependencias
 

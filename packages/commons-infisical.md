@@ -29,7 +29,7 @@ using Infisical.Extensions;
 
 builder.Configuration.AddInfisical(
     environmentSlug: builder.Environment.IsDevelopment() ? "dev" : "prod",
-    applicationName: "ecotrack");
+    applicationName: "my-app");
 ```
 
 ```csharp

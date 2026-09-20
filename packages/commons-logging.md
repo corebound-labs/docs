@@ -29,7 +29,7 @@ crítico.
 
 ```csharp
 var connectionString = builder.Configuration["sql-connectionstrings"]
-    ?? builder.Configuration.GetConnectionString("EcoTrackConnection")!;
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")!;
 
 builder.Host.UseCommonsSerilog(builder.Configuration, connectionString);
 // ...
@@ -57,11 +57,10 @@ app.UseExceptionHandling(); // Commons.ExceptionHandler, si está
 
 `LOG__ErrorLogs` se crea sola (`AutoCreateSqlTable`) recién con el primer
 `Error` real. Nombre `LOG__` (no `ErrorLogs` a secas) para alinear con las
-otras dos tablas de log del repo: `LOG__Audit`
+otras dos tablas de log de la familia: `LOG__Audit`
 ([Commons.AuditableLogging](commons-auditablelogging.md)) y
 `LOG__LogExceptionHandler`
-([Commons.ExceptionHandler](commons-exceptionhandler.md), sin usar hoy en
-EcoTrack).
+([Commons.ExceptionHandler](commons-exceptionhandler.md), opcional).
 
 ## `appsettings.json`
 
@@ -99,8 +98,7 @@ completo va al log.
 
 ## Job de purga (`ErrorLogPurgeService`)
 
-Reusa `Commons.BackgroundJobs.PollingBackgroundService` (mismo patrón que
-`ScheduledTransactionProcessor`) en vez de un scheduler cron-driven — corre
+Reusa `Commons.BackgroundJobs.PollingBackgroundService` (mismo patrón de cualquier job periódico) en vez de un scheduler cron-driven — corre
 en el mismo proceso, sin infraestructura adicional, con catch-up automático
 si el proceso estuvo dormido. Frecuencia fija de 24hs, no una hora exacta
 — `PeriodicTimer` no da esa precisión; no se consideró necesario un

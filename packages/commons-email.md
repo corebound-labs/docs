@@ -42,14 +42,14 @@ consumidor lo fija.
 ## Ejemplo mínimo de uso
 
 ```csharp
-public class InviteParticipantHandler(IAppEmailSender emailSender)
+public class SendWelcomeEmailHandler(IAppEmailSender emailSender)
 {
     public async Task HandleAsync(...)
     {
         await emailSender.SendAsync(
             toEmail: "usuario@ejemplo.com",
-            subject: "Te han invitado",
-            htmlBody: "<p>Alguien te ha invitado a...</p>");
+            subject: "Bienvenido",
+            htmlBody: "<p>Gracias por registrarte en...</p>");
     }
 }
 ```

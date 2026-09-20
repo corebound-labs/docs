@@ -321,11 +321,11 @@ el filtrado en sí sigue viviendo en `grid.js`, no en este paquete):
 ```csharp
 new SelectModel
 {
-    Id = "Wallet_Id", Name = "Wallet_Id",
-    Options = wallets, // cada SelectOption.ParentVal = Account_Id de esa wallet
+    Id = "City_Id", Name = "City_Id",
+    Options = cities, // cada SelectOption.ParentVal = Country_Id de esa ciudad
     PlaceholderValue = "defaultOption",
-    CascadeParentField = "Account_Id",
-    CascadeForeignKeyInChild = "Account_Id",
+    CascadeParentField = "Country_Id",
+    CascadeForeignKeyInChild = "Country_Id",
 }
 ```
 
@@ -402,15 +402,15 @@ el mismo prefijo de id que espera `switchTab`:
 ```csharp
 @await Html.PartialAsync("~/Views/Shared/_TabsStrip.cshtml", new UiMetadata.Elements.Models.TabsStripModel
 {
-    TabsId = "accountDetails",
-    Tabs = [ new() { Id = "wallets", Label = "Billeteras", Icon = "💰" }, new() { Id = "cards", Label = "Tarjetas", Icon = "💳" } ]
+    TabsId = "productDetails",
+    Tabs = [ new() { Id = "reviews", Label = "Reseñas", Icon = "⭐" }, new() { Id = "stock", Label = "Stock", Icon = "📦" } ]
 })
 
-<div id="tabPanel_accountDetails_wallets" class="tab-panel active">
-    <div id="wallets-grid" class="partial-container"></div>
+<div id="tabPanel_productDetails_reviews" class="tab-panel active">
+    <div id="reviews-grid" class="partial-container"></div>
 </div>
-<div id="tabPanel_accountDetails_cards" class="tab-panel">
-    <div id="cards-grid" class="partial-container"></div>
+<div id="tabPanel_productDetails_stock" class="tab-panel">
+    <div id="stock-grid" class="partial-container"></div>
 </div>
 ```
 
@@ -623,7 +623,7 @@ guardar. Guardar lo hace el formulario que contiene el picker (el id elegido via
 
 ## CodeInput (entrada de código, una casilla por carácter)
 
-Fila de casillas para valores cortos de longitud fija — los últimos 4 dígitos de una tarjeta, un
+Fila de casillas para valores cortos de longitud fija — los últimos 4 dígitos de un documento, un
 código de verificación, un PIN. Se activa sobre una propiedad `string` con
 `[CodeInputField(4)]` (ver `UiMetadata.Contracts`) y el modal del grid la renderiza sola; también
 se puede usar directamente:
