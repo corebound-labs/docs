@@ -1,7 +1,7 @@
 # 🏠 Proyecto EcoTrack
 
 > Esta sección documenta **la aplicación EcoTrack**, no las librerías.
-> Para las librerías reutilizables ver la pestaña [📦 Paquetes](../packages/).
+> Para las librerías reutilizables ver la pestaña [📦 Paquetes](/packages/).
 
 EcoTrack es una aplicación web de gestión financiera personal **y compartida**:
 cuentas, tarjetas, wallets y transacciones, con acceso compartido entre personas
@@ -51,25 +51,25 @@ dígitos ficticios y 30 transacciones).
 | | |
 |---|---|
 | ![Dashboard](img/dashboard.png ":size=460") | ![Cuentas](img/cuentas-grid.png ":size=460") |
-| **Dashboard** — KPIs y gráficos ([Charts](../packages/uimetadata-charts.md)) | **Cuentas** — grilla ([Grid](../packages/uimetadata-grid.md)) |
+| **Dashboard** — KPIs y gráficos ([Charts](/packages/uimetadata-charts.md)) | **Cuentas** — grilla ([Grid](/packages/uimetadata-grid.md)) |
 | ![Detalle de cuenta](img/cuenta-detalle.png ":size=460") | ![Transacciones](img/transacciones-grid.png ":size=460") |
 | **Detalle de cuenta** — subgrillas de wallets y tarjetas | **Transacciones** — importes con color y paginación |
 | ![Modal de cuenta](img/cuentas-modal.png ":size=460") | ![Modal de transacción](img/transacciones-modal.png ":size=460") |
-| **Modal de alta** generado por reflection ([Modal](../packages/uimetadata-modal.md)) | **Modal de transacción** con selects en cascada |
+| **Modal de alta** generado por reflection ([Modal](/packages/uimetadata-modal.md)) | **Modal de transacción** con selects en cascada |
 
-La barra lateral de todas las capturas es [UiMetadata.Sidebar](../packages/uimetadata-sidebar.md).
+La barra lateral de todas las capturas es [UiMetadata.Sidebar](/packages/uimetadata-sidebar.md).
 
 ## Guías
 
-- [Seguridad](security.md)
-- [Roles, planes y panel admin](roles-plans-admin.md)
-- [Verificación en dos pasos](two-factor-authentication.md)
-- [Importación de transacciones](importing-transactions.md)
-- [Añadir un tema](adding-a-theme.md)
-- [Operación y despliegue](operations.md)
+- [Seguridad](/ecotrack/security.md)
+- [Roles, planes y panel admin](/ecotrack/roles-plans-admin.md)
+- [Verificación en dos pasos](/ecotrack/two-factor-authentication.md)
+- [Importación de transacciones](/ecotrack/importing-transactions.md)
+- [Añadir un tema](/ecotrack/adding-a-theme.md)
+- [Operación y despliegue](/ecotrack/operations.md)
 
 ## Relación con los paquetes
 
 EcoTrack **consume** los paquetes `Commons.*` / `UiMetadata.*`; los paquetes no
 conocen a EcoTrack. Qué paquete se usa dónde y con qué configuración está en
-[Qué paquetes usa EcoTrack](uso-de-paquetes.md).
+[Qué paquetes usa EcoTrack](/ecotrack/uso-de-paquetes.md).
