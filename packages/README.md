@@ -36,6 +36,7 @@ graph TD
         Testing[Testing]
         Jobs[BackgroundJobs]
         Logging[Logging]
+        Importing[Importing]
     end
 
     Grid --> Contracts
@@ -61,12 +62,13 @@ graph TD
     click Testing "#/packages/commons-testing"
     click Jobs "#/packages/commons-backgroundjobs"
     click Logging "#/packages/commons-logging"
+    click Importing "#/packages/commons-importing"
 ```
 
 Sin flecha entrante = paquete base, sin dependencias de otro `Commons.*`/
 `UiMetadata.*` de este catálogo (`Contracts`, `Elements`, `Modal`,
 `Sidebar`, `CrudOrm`, `Infisical`, `ExceptionHandler`, `Email`,
-`BackgroundJobs`). Click en cualquier nodo para ir a su página.
+`BackgroundJobs`, `Importing`). Click en cualquier nodo para ir a su página.
 
 ## Fuente de verdad
 
