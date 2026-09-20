@@ -577,3 +577,46 @@ limpieza posterior.
 
 Ninguna de otro paquete `UiMetadata.*` — es de los paquetes base, junto con
 `UiMetadata.Contracts`, del que dependen `UiMetadata.Grid`/`UiMetadata.Charts`.
+
+## ThemePicker (selector de tema con vista previa)
+
+Una tarjeta por tema con una miniatura de la app pintada con los **colores reales** de ese
+tema, y vista previa en vivo: al elegir una tarjeta se aplica el tema a toda la página sin
+guardar. Guardar lo hace el formulario que contiene el picker (el id elegido viaja en un
+`<input type="hidden">`).
+
+```csharp
+@await Html.PartialAsync("~/Views/Shared/_ThemePicker.cshtml", new ThemePickerModel
+{
+    Id = "themePicker",
+    Name = "themeId",              // name del input hidden que se envía en el formulario
+    SelectedId = "dark",           // el tema guardado
+    Themes =
+    [
+        new() { Id = "dark",  Name = "Oscuro", Tag = "Oscuro", Description = "…", CssUrl = "/css/themes/theme-dark.css" },
+        new() { Id = "light", Name = "Claro",  Tag = "Claro",  Description = "…", CssUrl = "/css/themes/theme-light.css" }
+    ]
+})
+```
+
+- **Cómo pinta las miniaturas:** `theme-picker.js` descarga el CSS de cada tema (`CssUrl`), lee
+  sus variables (`--x: valor;`, resolviendo `var(--y)` contra el propio tema) y las copia a la
+  tarjeta como `--tp-*`. No hay lista de colores duplicada: un tema nuevo aparece bien sin
+  tocar el componente. `PreviewVariables` decide qué variable del tema alimenta cada color
+  (por defecto `--page-bg`, `--bg-card`, `--sidebar-bg`, `--text-main`, `--color-primary`, …).
+- **Vista previa en vivo** (`LivePreview`, por defecto `true`): sustituye el `<link>` del tema
+  (`ThemeLinkId`, por defecto `app-theme-link`) esperando a que cargue el nuevo — sin
+  parpadeo —, cambia el atributo de `<html>` (`ThemeAttribute`, por defecto `data-theme`) y el
+  `<meta name="theme-color">`. Si eliges otro antes de que cargue el anterior, el pendiente se
+  descarta. Aparece un aviso "vista previa, sin guardar" con botón *Deshacer*.
+- **Accesibilidad:** `radiogroup` de tarjetas; las flechas del teclado mueven y seleccionan.
+  Respeta `prefers-reduced-motion`.
+- **CSP:** sin eval ni handlers inline; el click llega por `data-ui-onclick` (ver "Handlers
+  declarativos"). El JS solo hace `fetch` de los CSS de tema (mismo origen).
+- **Requisito de los CSS de tema:** todos definen las mismas variables bajo un selector del tipo
+  `:root, html[data-theme="<id>"]`. Estilos de un tema fuera de su fichero rompen el cambio en vivo.
+- Tokens: usa `--grid-*` de la página actual (con fallback) para las tarjetas; los colores de la
+  miniatura salen del tema que representa.
+- Archivos: `Views/Shared/_ThemePicker.cshtml`, `Models/ThemePickerModel.cs`,
+  `wwwroot/js/theme-picker.js`, `wwwroot/css/theme-picker.css` (ya incluidos en los agregadores
+  `_UiMetadataScripts`/`_UiMetadataStyles` de Grid).
