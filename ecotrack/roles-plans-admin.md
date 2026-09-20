@@ -52,7 +52,7 @@ motivo) y `uiMetadataFetch` navega al login si una llamada pierde la sesión.
   endpoints; ocultar el enlace no es seguridad. Sin permiso: 403 (a un administrador sin 2FA que navega se le lleva a
   activarlo).
 - **Listado:** filtros por rol, plan (se rellena desde `Plans`, así que un plan nuevo aparece solo), estado y test;
-  la búsqueda de texto es la del grid. Filtros con la barra genérica del RCL ([Grid](packages/uimetadata-grid.md)).
+  la búsqueda de texto es la del grid. Filtros con la barra genérica del RCL ([Grid](../packages/uimetadata-grid.md)).
 - **Ficha** (HTML renderizado en servidor, todo codificado): datos de cuenta, datos del bloqueo, **solo recuentos**
   de uso frente a los límites e historial de acciones. **Nunca** transacciones, saldos ni wallets.
 - **Acciones** (`IUserAdminService`): bloquear (pide motivo, ≤ 500) / desbloquear, cambiar plan, marcar/desmarcar

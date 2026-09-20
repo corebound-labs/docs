@@ -1,8 +1,9 @@
 # Corebound Labs
 
-> Documentación de paquetes reutilizables `Commons.*` / `UiMetadata.*`
+> Dos áreas: **paquetes reutilizables** (NuGet) y **el proyecto EcoTrack**
 
-- Instalación, ejemplos y design tokens de cada paquete
-- Fuente de verdad: el `README.md` de cada paquete en su propio repo
+- 📦 Paquetes `Commons.*` / `UiMetadata.*`: instalación y ejemplos genéricos
+- 🏠 EcoTrack: guías de la aplicación (seguridad, roles, operación…)
 
-[Empezar](README.md)
+[Paquetes](/packages/)
+[Proyecto EcoTrack](/ecotrack/)

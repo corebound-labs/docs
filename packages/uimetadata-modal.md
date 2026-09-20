@@ -120,8 +120,8 @@ guardar (ej. un visor de imagen), no lo incluyas.
 {
     ModalId = "myModal",
     Header = new UiMetadata.Modal.Models.ModalHeaderModel { HeaderId = "myModalTitle", TitleText = "Lo que quieras" },
-    BodyPartialView = "~/Views/Participant/_ParticipantCard.cshtml", // de OTRO feature, sin relación con el "tema" del modal
-    BodyModel = participantVm,
+    BodyPartialView = "~/Views/Customer/_CustomerCard.cshtml", // de OTRO feature, sin relación con el "tema" del modal
+    BodyModel = customerVm,
     Actions = new UiMetadata.Modal.Models.ModalActionsModel { CancelOnClick = "closeModal('myModal')", SaveOnClick = "saveMyThing()" }
 })
 ```
@@ -162,7 +162,7 @@ hace su **propio fetch** con `uiMetadataFetch`, pidiendo solo la entidad
 que se va a editar en el momento en que se abre el modal:
 
 ```js
-await openEntityModal("Account", accountId, gridContainerId);
+await openEntityModal("Product", productId, gridContainerId);
 ```
 
 El beneficio no es de UX (hay latencia de un fetch extra) sino de **carga
@@ -183,24 +183,23 @@ ya embebido, sin llamar `openEntityModal` a mano.
 Sin (1), `openEntityModal` solo hace un `console.warn` y no reemplaza el
 flujo por defecto, que no requiere ningún endpoint nuevo.
 
-### Las 5 entidades de EcoTrack ya lo implementan (referencia real)
+### Convención de endpoints
+
+Cada entidad necesita un endpoint `GetById` que aplique **su propio filtro de acceso** (el modal solo pinta lo que el backend devuelve). Ejemplo genérico:
 
 | Entidad | Controller | Filtro de acceso |
 |---|---|---|
-| `Account` | `AccountController.GetAccountById` | `AccountParticipants.Any(ap => ap.Participant.UserId == userId && ap.Participant.IsActive)` |
-| `Wallet` | `AccountController.GetWalletById` | `IVisibilityService.ResolvePermissionAsync` (Account→Wallet resuelto) |
-| `Card` | `AccountController.GetCardById` | `CreatedByUserId == userId` (Card nunca se comparte) |
-| `Transaction` | `TransactionController.GetById` | acceso a la Wallet, o una fila `TransactionParticipant` explícita propia |
-| `Participant` | `ParticipantController.GetById` | `OwnerId == userId` (catálogo propio) |
+| `Product` | `ProductController.GetProductById` | `Product.OwnerId == userId` |
+| `Variant` | `ProductController.GetVariantById` | acceso al `Product` padre |
+| `Order` | `OrderController.GetById` | `Order.CustomerId == userId` |
 
-`Wallet`/`Card` comparten convención con placeholder de tipo
-(`"/Account/GetDummyById/__ID__"`); `Transaction`/`Participant` tienen una
-sola entidad por página, así que apuntan directo a su único `GetById`.
+Entidades que comparten controller (`Product`/`Variant`) usan el placeholder de tipo
+(`"/Product/GetDummyById/__ID__"`); una entidad única por página apunta directo a su `GetById`.
 
 ### Dos bugs reales encontrados al integrar esto (ya corregidos, útiles como advertencia)
 
-1. **`entityType` sin strip de `"ViewModel"` en la URL** — `data-entity-type` es el nombre completo de la clase (`"WalletViewModel"`), correcto para los ids del form pero no para la acción del controller (`GetWalletById`, sin sufijo). Sin el strip, la URL armada era `/Account/GetWalletViewModelById/...` → 404. Fix: `entityType.replace(/ViewModel$/, "")` **solo** al armar la URL.
-2. **`Json(vm)` camelCasea los nombres de propiedad por default en ASP.NET Core**, pero `fillModalForm` busca campos por `name="Wallet_Id"` (PascalCase). El fetch llegaba 200 OK pero ningún campo coincidía — modal siempre vacío, sin error visible. Fix: los 5 `GetById` devuelven `new JsonResult(vm, new System.Text.Json.JsonSerializerOptions())` en vez de `Json(vm)`.
+1. **`entityType` sin strip de `"ViewModel"` en la URL** — `data-entity-type` es el nombre completo de la clase (`"VariantViewModel"`), correcto para los ids del form pero no para la acción del controller (`GetVariantById`, sin sufijo). Sin el strip, la URL armada era `/Product/GetVariantViewModelById/...` → 404. Fix: `entityType.replace(/ViewModel$/, "")` **solo** al armar la URL.
+2. **`Json(vm)` camelCasea los nombres de propiedad por default en ASP.NET Core**, pero `fillModalForm` busca campos por `name="Variant_Id"` (PascalCase). El fetch llegaba 200 OK pero ningún campo coincidía — modal siempre vacío, sin error visible. Fix: los `GetById` devuelven `new JsonResult(vm, new System.Text.Json.JsonSerializerOptions())` en vez de `Json(vm)`.
 
 ## Toast — uso mínimo
 

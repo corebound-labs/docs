@@ -2,7 +2,7 @@
 
 Importar los movimientos de un extracto bancario (CSV, XLS o XLSX) a una billetera, desde **Transacciones →
 Importar archivo**. No usa IA: la lectura y la detección de columnas son reglas
-([Commons.Importing](packages/commons-importing.md)) y el usuario puede corregir todo lo que no acierte.
+([Commons.Importing](../packages/commons-importing.md)) y el usuario puede corregir todo lo que no acierte.
 
 ## Flujo del usuario (asistente de 4 pasos)
 1. **Archivo y billetera:** elige el archivo (máx. 2 MB) y la billetera de destino (solo las que puede editar). Hay una

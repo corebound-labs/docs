@@ -162,7 +162,7 @@ dibujar valores negativos: el backend debe mandar los datos en positivo.
 3. `_ChartCard.cshtml`/`_KpiCard.cshtml` por cada chart/KPI.
 4. `_ChartModal.cshtml` una sola vez por página.
 5. Un endpoint backend que devuelva `ChartViewModel[]` con el shape esperado.
-6. El propio layout de columnas (CSS) — el paquete no ofrece utilidades `.charts-grid-N`, cada consumidor arma el suyo (ej. `.chart-grid-top`/`.chart-grid-bot` de EcoTrack, 2.5fr/1.5fr, es decisión de esa página, no del paquete).
+6. El propio layout de columnas (CSS) — el paquete no ofrece utilidades `.charts-grid-N`, cada consumidor arma el suyo (ej. un `.chart-grid-top` 2.5fr/1.5fr es decisión de esa página, no del paquete).
 
 ## Design tokens (`--chart-*`, sin capa `:root` propia)
 
