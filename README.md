@@ -3,14 +3,16 @@
 Documentación de los paquetes reutilizables (`Commons.*`/`UiMetadata.*`)
 usados por los proyectos de Corebound Labs — hoy, principalmente EcoTrack.
 
-Este sitio documenta **los paquetes**, no las apps que los consumen. Para
-lógica de negocio de EcoTrack (controllers, Handlers), ver el repo de
-EcoTrack directamente.
+Este sitio documenta sobre todo **los paquetes**. Para la lógica de negocio de
+EcoTrack (controllers, Handlers) ver el repo de EcoTrack directamente; aquí solo
+hay unas pocas **guías transversales** de la app (seguridad, roles y planes,
+operación, temas, 2FA), porque tocan varios paquetes a la vez.
 
 ## Empezar
 
 - **Paquetes `Commons.*`** — lógica de backend pura, sin UI: [CrudOrm](packages/commons-crudorm.md), [Infisical](packages/commons-infisical.md), [AuditableLogging](packages/commons-auditablelogging.md), [ExceptionHandler](packages/commons-exceptionhandler.md), [Email](packages/commons-email.md), [Testing](packages/commons-testing.md), [BackgroundJobs](packages/commons-backgroundjobs.md), [Logging](packages/commons-logging.md).
 - **Paquetes `UiMetadata.*`** — Razor Class Libraries de UI: [Contracts](packages/uimetadata-contracts.md), [Grid](packages/uimetadata-grid.md), [Modal](packages/uimetadata-modal.md), [Elements](packages/uimetadata-elements.md), [Sidebar](packages/uimetadata-sidebar.md), [Charts](packages/uimetadata-charts.md).
+- **Guías de EcoTrack** — [Seguridad](security.md), [Roles, planes y panel admin](roles-plans-admin.md), [Operación y despliegue](operations.md), [Añadir un tema](adding-a-theme.md), [Verificación en dos pasos](two-factor-authentication.md).
 
 ## Mapa de dependencias
 
