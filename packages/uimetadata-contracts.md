@@ -115,3 +115,11 @@ porque `Id`/`Name` no son propiedades reales del `ValueTuple` en runtime.
 ## Dependencias
 
 Ninguna — es el paquete base del que depende `UiMetadata.Grid`.
+
+## Paginación en el servidor (`GridConfig.ServerPaging`)
+
+`GridConfig.ServerPaging` (`GridServerPaging`) es opcional: null = la grilla pagina, ordena y busca en el cliente (comportamiento
+de siempre); con valor, el servidor ya aplicó página/orden/búsqueda y el cliente pide otra al servidor en cada cambio. Ver la
+sección homónima en `UiMetadata.Grid`. `GridServerPaging.ParseRequest(parametros, campoOrdenPorDefecto, descPorDefecto)` lee
+`page`, `pageSize` (5/10/20/50), `sortField`, `sortDir`, `search` y `searchFields` del diccionario de parámetros del grid y
+devuelve un `GridPagingRequest`.
