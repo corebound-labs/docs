@@ -35,3 +35,13 @@ La documentación genérica (instalación, API, ejemplos) está en
 entidad por página y apuntan directo a su `GetById`. Los 5 `GetById` devuelven
 `new JsonResult(vm, new System.Text.Json.JsonSerializerOptions())` para no
 camelCasear (ver los dos bugs en la página de Modal).
+
+## Cómo se ve cada paquete en EcoTrack
+
+| Paquete | Dónde verlo |
+|---|---|
+| UiMetadata.Sidebar | Barra lateral de cualquier pantalla |
+| UiMetadata.Charts | ![Dashboard](img/dashboard.png ":size=380") |
+| UiMetadata.Grid | ![Grilla de transacciones](img/transacciones-grid.png ":size=380") |
+| UiMetadata.Grid (subgrillas) | ![Detalle de cuenta](img/cuenta-detalle.png ":size=380") |
+| UiMetadata.Modal + Contracts | ![Modal de cuenta](img/cuentas-modal.png ":size=380") |
