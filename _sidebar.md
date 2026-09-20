@@ -20,3 +20,4 @@
 
 - **Guías**
   - [Añadir un tema](adding-a-theme.md)
+  - [Verificación en dos pasos](two-factor-authentication.md)

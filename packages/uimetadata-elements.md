@@ -659,3 +659,8 @@ se puede usar directamente:
 - Tokens: `--grid-input-bg`, `--grid-border-input`, `--grid-input-border-focus`, `--grid-input-shadow-focus`,
   `--grid-text-main`, `--grid-radius-lg` y `--grid-btn-danger-bg` (error), todos con fallback literal en
   `code-input.css`. Ya incluidos en los agregadores `_UiMetadataScripts`/`_UiMetadataStyles` de Grid.
+
+`AutoSubmit` (default `false`): al completarse todas las casillas se envía el formulario que contiene el campo
+(código de verificación: no hace falta pulsar "Continuar"), una sola vez y nunca al rellenar el campo desde código.
+`AutoFocus` (default `false`): la primera casilla recibe el foco al cargar la página. Con `AutoComplete =
+"one-time-code"` el móvil ofrece rellenar el código desde el SMS.
