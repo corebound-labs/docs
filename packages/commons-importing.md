@@ -16,10 +16,10 @@ var rows      = RowMapper.Map(file.Rows, mapping);             // ParsedRow: fec
 | Tipo | Qué hace |
 |---|---|
 | `TabularReader` | CSV (delimitador `;` `,` tab `\|` detectado, UTF-8 o Windows-1252, comillas), XLS y XLSX con **ExcelDataReader** (MIT). Solo lee celdas: logos e imágenes de la cabecera se ignoran. Las filas vacías se conservan para que los números de fila coincidan con el archivo. Un archivo ilegible lanza `ImportFileException` (es una `InvalidOperationException`) |
-| `HeaderDetector` | Busca la cabecera en las 30 primeras filas por palabras clave (es/en) y completa lo que falte mirando el contenido. `BuildResult(rows, fila)` recalcula para la fila que elija el usuario |
+| `HeaderDetector` | Busca la cabecera en las 30 primeras filas por palabras clave (es/en, ignorando puntuación: "F. Valor" = fecha, no importe) y completa lo que falte mirando el contenido. `BuildResult(rows, fila)` recalcula para la fila que elija el usuario |
 | `ColumnMapping` / `RowMapper` | Fecha, concepto y **una** columna de importe con signo **o** cargo/abono (el cargo resta y el abono suma, con el signo que traiga el archivo). Las filas de pie ("Total", "Saldo…") se ignoran; el resto de filas malas llevan `Error` |
 | `ValueParsers` | Importes (`1.234,56`, `1,234.56`, `12,5-`, `(12,50)`, símbolos de moneda) y fechas (día-primero por defecto, mes-primero si el archivo lo exige, ISO, con o sin hora) |
-| `TextNormalizer` | `Fold` (mayúsculas sin tildes) y `NormalizeConcept` (sin números, fechas ni puntuación), para huellas de duplicados y reglas de categoría |
+| `TextNormalizer` | `Fold` (mayúsculas sin tildes), `FoldWords` (además sin puntuación, para comparar cabeceras), `StripCardNumbers` (quita tarjetas enmascaradas `5402XXXXXXXX4021` o de 16 dígitos del concepto; `RowMapper` lo aplica al concepto) y `NormalizeConcept` (sin tarjetas, números, fechas ni puntuación) para huellas de duplicados y reglas de categoría |
 
 ## Límites y decisiones
 - Una sola hoja (la primera con datos), 5000 filas y 100 columnas por defecto; `TabularFile.Truncated` avisa.

@@ -21,6 +21,35 @@ editar, borrar, subgrids anidados) sin escribir el HTML/JS de la tabla a
 mano por cada entidad — el ViewModel + sus atributos de `UiMetadata.Contracts`
 son suficientes para que el sistema genere todo.
 
+## Paginación, orden y búsqueda en el servidor (`GridConfig.ServerPaging`)
+
+Por defecto la grilla recibe **todas** las filas y pagina/ordena/busca sobre el DOM. Con miles de filas eso es lento
+(el servidor pinta todas, el navegador las parsea y cada búsqueda recorre todas). Para esos casos el controller puede
+activar `GridConfig.ServerPaging` (`GridServerPaging`, en `UiMetadata.Contracts`): llegan solo las filas de la página
+actual y cada cambio pide otra al servidor. Es opt-in por grilla; sin él nada cambia.
+
+**Controller:**
+```csharp
+var paging = GridServerPaging.ParseRequest(parametros, nameof(VM.TransactionDate), defaultSortDescending: true);
+var result = await handler.HandleAsync(new Query(..., paging.Page, paging.PageSize,
+    paging.SortField, paging.SortDescending, paging.Search, paging.SearchFields));
+config.ServerPaging = new GridServerPaging(page, paging.PageSize, result.TotalCount,
+    paging.SortField, paging.SortDescending, paging.Search, paging.SearchFields);
+```
+`ParseRequest` lee `page`, `pageSize` (5/10/20/50), `sortField`, `sortDir` (`asc`/`desc`), `search` y `searchFields`
+(nombres de propiedad separados por coma) del diccionario que ya envía `loadEntity`. El servidor debe **aplicar** filtro,
+orden y página, y devolver el total; el `page` de `GridServerPaging` debe ser el realmente aplicado (ya acotado a la última
+página).
+
+**Cliente:** `_Grid.cshtml` vuelca el estado en `data-server-paging`, `data-page`, `data-page-size`, `data-total-rows`,
+`data-sort-field`, `data-sort-dir`, `data-search` y `data-search-fields`, y `initSingleGrid` lo trata como la verdad.
+Paginador, cabeceras y filas por página llaman a `loadEntity` con esos parámetros (que quedan en `gridLoadCache`, así
+`refreshGrid` tras guardar/borrar conserva página, orden y búsqueda). El buscador espera 350 ms tras teclear, no muestra el
+loader global y conserva foco y cursor. `loadEntity` descarta respuestas obsoletas (solo se pinta la última petición) y
+acepta `{ silent: true }` como quinto argumento para no mostrar el loader.
+
+**Ojo:** el orden por una columna calculada (que no existe en BD) debe caer a un orden por defecto en el servidor.
+
 ## Instalación
 
 ```xml
@@ -350,6 +379,9 @@ Ver la tabla "Flags leídos por convención de nombre" en la página de
 `UiMetadata.Contracts` — son los mismos 4 flags (`CanOpenModal`,
 `CanDeleteRow`, `CanRowAction`, `IsInactiveRow`), y `RowClickAction`/
 `DetailsButtonAction` de `GridConfig`.
+
+`--grid-btn-success-bg` (botón "Importar archivo") usa por defecto los colores secundarios del tema
+(`--color-secondary-light` → `--color-secondary`), no un verde fijo.
 
 `--grid-control-h` (2.75rem) es el alto compartido por todos los controles
 de la barra superior del grid (buscador, menú de filas, "+ Crear" y sus
