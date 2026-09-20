@@ -17,3 +17,6 @@
   - [UiMetadata.Elements](packages/uimetadata-elements.md)
   - [UiMetadata.Sidebar](packages/uimetadata-sidebar.md)
   - [UiMetadata.Charts](packages/uimetadata-charts.md)
+
+- **Guías**
+  - [Añadir un tema](adding-a-theme.md)
