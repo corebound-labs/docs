@@ -620,3 +620,42 @@ guardar. Guardar lo hace el formulario que contiene el picker (el id elegido via
 - Archivos: `Views/Shared/_ThemePicker.cshtml`, `Models/ThemePickerModel.cs`,
   `wwwroot/js/theme-picker.js`, `wwwroot/css/theme-picker.css` (ya incluidos en los agregadores
   `_UiMetadataScripts`/`_UiMetadataStyles` de Grid).
+
+## CodeInput (entrada de código, una casilla por carácter)
+
+Fila de casillas para valores cortos de longitud fija — los últimos 4 dígitos de una tarjeta, un
+código de verificación, un PIN. Se activa sobre una propiedad `string` con
+`[CodeInputField(4)]` (ver `UiMetadata.Contracts`) y el modal del grid la renderiza sola; también
+se puede usar directamente:
+
+```csharp
+@await Html.PartialAsync("~/Views/Shared/_CodeInput.cshtml", new CodeInputModel
+{
+    Id = "Last4Digits", Name = "Last4Digits",
+    Length = 4,                  // número de casillas = longitud exacta del valor
+    Numeric = true,              // solo dígitos + teclado numérico en móvil (default)
+    AutoComplete = "off",        // "one-time-code" para un código de verificación (SMS)
+    Label = "Últimos 4 dígitos"  // etiqueta accesible del grupo
+})
+```
+
+- **El valor completo vive en un `<input>` real** con `name`/`id` (clase `.ui-code-value`): es el que
+  viaja en el `FormData`, el que valida jQuery Validate y el que rellenan `fillModalForm` /
+  `clearModalForm`. Va oculto sin `display:none` (jQuery Validate ignora los campos `:hidden`); las
+  casillas (`.ui-code-box`, sin `name`) son solo presentación. Un error de validación sobre el input
+  real se refleja en las casillas por CSS (`.input-validation-error ~ .ui-code-box`).
+- **Comportamiento** (`code-input.js`, listeners delegados en `document`: sirve en HTML inyectado
+  después, sin inicializar nada): escribir avanza; Backspace en una casilla vacía retrocede y borra la
+  anterior; flechas/Inicio/Fin mueven el foco; enfocar selecciona el carácter (escribir lo reemplaza);
+  pegar o el autocompletado de un código reparte los caracteres (un código completo desde la primera
+  casilla, uno parcial desde la enfocada); en modo numérico se descartan las letras.
+- **Integración con el modal** (`UiMetadata.Modal`): `fillModalForm` y `clearModalForm` re-sincronizan
+  las casillas (`syncCodeInputValue`), y `lockField`/`unlockField` del grid bloquean también las casillas
+  (`setCodeInputReadOnly`). `setModalFieldsDisabled` ya las cubre (deshabilita todos los `<input>`).
+- **Validación:** el input real lleva `pattern="[0-9]{N}"` en modo numérico (una entrada parcial no
+  pasa la validación nativa; vacío sí, para campos opcionales). La validación de verdad debe estar
+  también en el servidor (p. ej. `SaveCardHandler`).
+- Sin eval ni handlers inline: compatible con una CSP estricta.
+- Tokens: `--grid-input-bg`, `--grid-border-input`, `--grid-input-border-focus`, `--grid-input-shadow-focus`,
+  `--grid-text-main`, `--grid-radius-lg` y `--grid-btn-danger-bg` (error), todos con fallback literal en
+  `code-input.css`. Ya incluidos en los agregadores `_UiMetadataScripts`/`_UiMetadataStyles` de Grid.
