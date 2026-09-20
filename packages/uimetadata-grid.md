@@ -448,3 +448,7 @@ los filtros viajan en el cuerpo JSON del POST (solo los que tienen valor) y
 ## Navegación a detalle por POST y token antiforgery
 
 `openGridRowDetails` (clic en la fila o botón "Ver detalle" con `RowClickAction`/`DetailsButtonAction` = `"Details"`) navega con un `<form method="POST">` creado por JS hacia `openNewView`. Ese form no lleva el token antiforgery que un tag helper de Razor añade solo, así que con la validación global de CSRF (`AutoValidateAntiforgeryToken`) la petición daba **400** y la navegación se rompía. Ahora el form incluye `__RequestVerificationToken`, tomado de `<meta name="csrf-token">` (el mismo token que ya lee `uiMetadataFetch` para los `fetch`). Si la página no tiene ese `<meta>`, no se añade nada. `appendCsrfToken(form)` es global: úsalo también en cualquier otro formulario POST creado a mano.
+
+## Campos booleanos del modal: etiqueta e interruptor en una línea
+
+En el modal, un campo booleano (`_Switch.cshtml`) muestra la etiqueta a la izquierda y el interruptor en el extremo derecho, en la misma línea (`.form-field:has(> .switch-wrapper)`). Antes quedaban apilados y pegados a la izquierda. Solo afecta a los `.form-field` del modal; los interruptores de otras pantallas (p. ej. Perfil) no cambian.
