@@ -27,3 +27,14 @@ No hace falta tocar el layout, el selector ni la base de datos: el id se guarda 
 - **Guardar** (`POST /Profile/UpdateTheme`) valida el id contra el catálogo, lo guarda e invalida
   la caché de acceso para que la siguiente página ya salga con el tema nuevo.
 - La vista previa del selector es el componente `ThemePicker` de `UiMetadata.Elements`.
+
+## Temas incluidos
+
+| Id | Nombre | Tipo | Acento |
+|---|---|---|---|
+| `dark` | Oscuro | Oscuro | Violeta (por defecto) |
+| `light` | Claro | Claro | Violeta |
+| `ocean` | Océano | Oscuro | Azur |
+| `mint` | Menta | Claro | Turquesa |
+
+Océano y Menta se derivaron de Oscuro y Claro girando la familia de color de acento y los neutros (fondos, bordes, textos), manteniendo saturación, luminosidad y los colores semánticos (verde de éxito, rojo de peligro, naranja de aviso). Al crear un tema conviene comprobar el contraste del texto blanco sobre `--color-primary` y `--color-primary-strong` (los botones principales) y de `--text-muted` sobre el fondo: los temas actuales quedan entre 4,2 y 6,3 en botones y por encima de 4,5 en el texto atenuado.
