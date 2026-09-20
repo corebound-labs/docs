@@ -23,8 +23,7 @@ de carpetas se traduce directo en la jerarquía de páginas de la wiki.
 **Limitación real**: esa función solo apunta a repos dentro de Azure Repos,
 no puede apuntar a un repo de GitHub externo. Como GitHub está bloqueado en
 tu empresa, hace falta llevar la carpeta a un repo de Azure Repos primero —
-ese paso es manual, fuera de lo que Claude Code puede hacer desde este
-entorno (sin credenciales de tu Azure DevOps).
+ese paso es manual (requiere tus credenciales de Azure DevOps).
 
 ## Pasos
 
