@@ -15,6 +15,15 @@ familia es *"¿alguien razonablemente querría A sin B?"*, y nadie pide
 "Switch sin Badge". `Modal` y `Grid` sí quedan aparte porque son sistemas
 con mecánica propia, no controles atómicos.
 
+## Vista previa
+
+| | |
+|---|---|
+| ![Botones de acción](img/elements-actionbutton.png ":size=420") | ![Tabs](img/elements-tabs.png ":size=420") |
+| ![StatusCard](img/elements-statuscard.png ":size=420") | ![SettingsCard](img/elements-settingscard.png ":size=420") |
+
+_Capturas de las demos en vivo de esta misma página._
+
 ## Cuándo usarlo
 
 Para cualquier control visual pequeño y genérico (sin lógica de negocio)

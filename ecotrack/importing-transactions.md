@@ -14,6 +14,30 @@ Importar archivo**. No usa IA: la lectura y la detección de columnas son reglas
    gastos. Nada se guarda todavía.
 4. **Resultado:** importadas, omitidas por duplicadas, con error y las que fallaron al guardar (con su fila).
 
+
+## Diagrama del flujo
+
+```mermaid
+sequenceDiagram
+    actor U as Usuario
+    participant B as Navegador
+    participant C as TransactionImportController
+    participant L as Commons.Importing
+    U->>B: elige archivo y billetera
+    B->>C: POST Analyze (archivo)
+    C->>L: TabularReader + HeaderDetector
+    L-->>C: cabecera, columnas propuestas, muestra
+    C-->>B: propuesta de mapeo
+    U->>B: corrige columnas / fila de cabecera
+    B->>C: POST Preview (archivo + mapeo)
+    C-->>B: filas Nueva / Duplicada / Error (sin guardar)
+    U->>B: confirma
+    B->>C: POST Import (archivo + mapeo)
+    C-->>B: importadas, omitidas, con error
+```
+
+El navegador reenvía el archivo en cada paso: el servidor no guarda estado.
+
 ## Cómo funciona (backend)
 Sin estado en el servidor: el navegador conserva el archivo y lo **reenvía en cada paso**, así no hay nada que caducar ni
 limpiar. Endpoints de `TransactionImportController` (todos `[Authorize]`, con el token CSRF de siempre):

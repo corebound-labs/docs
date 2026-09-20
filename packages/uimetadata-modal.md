@@ -12,6 +12,14 @@ un `<form>`). También incluye **Toast** y **Confirm**, agrupados aquí
 porque los tres son overlays de feedback/interacción, cada uno demasiado
 chico para su propio `.csproj`.
 
+## Vista previa
+
+| | | |
+|---|---|---|
+| ![Modal genérico](img/modal-demo.png ":size=300") | ![Confirm](img/modal-confirm.png ":size=300") | ![Toasts](img/modal-toasts.png ":size=300") |
+
+_Capturas de las demos en vivo de esta misma página._
+
 ## Cuándo usarlo
 
 Para cualquier modal (de contenido libre o de formulario crear/editar),

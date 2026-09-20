@@ -12,6 +12,14 @@ graph LR
     Charts[UiMetadata.Charts] --> Modal[UiMetadata.Modal]
 ```
 
+## Vista previa
+
+![Chart de área](img/charts-area.png ":size=520")
+
+![KPI cards](img/charts-kpi.png ":size=520")
+
+_Capturas de las demos en vivo de esta misma página._
+
 ## Cuándo usarlo
 
 Para pintar cualquier cantidad de charts/KPIs en cualquier vista. **No hay
