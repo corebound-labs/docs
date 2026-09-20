@@ -444,3 +444,7 @@ los filtros viajan en el cuerpo JSON del POST (solo los que tienen valor) y
   Tokens: `--grid-input-bg`, `--grid-border-input`, `--grid-select-option-bg`, `--grid-text-main`.
 - Modelo: `GridFiltersModel`/`GridFilterModel` (`UiMetadata.Grid.Models`); reutiliza `SelectOption`
   de `UiMetadata.Elements`.
+
+## Navegación a detalle por POST y token antiforgery
+
+`openGridRowDetails` (clic en la fila o botón "Ver detalle" con `RowClickAction`/`DetailsButtonAction` = `"Details"`) navega con un `<form method="POST">` creado por JS hacia `openNewView`. Ese form no lleva el token antiforgery que un tag helper de Razor añade solo, así que con la validación global de CSRF (`AutoValidateAntiforgeryToken`) la petición daba **400** y la navegación se rompía. Ahora el form incluye `__RequestVerificationToken`, tomado de `<meta name="csrf-token">` (el mismo token que ya lee `uiMetadataFetch` para los `fetch`). Si la página no tiene ese `<meta>`, no se añade nada. `appendCsrfToken(form)` es global: úsalo también en cualquier otro formulario POST creado a mano.
