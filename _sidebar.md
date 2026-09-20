@@ -9,6 +9,7 @@
   - [Commons.Testing](packages/commons-testing.md)
   - [Commons.BackgroundJobs](packages/commons-backgroundjobs.md)
   - [Commons.Logging](packages/commons-logging.md)
+  - [Commons.Importing](packages/commons-importing.md)
 
 - **UiMetadata.\* (UI)**
   - [UiMetadata.Contracts](packages/uimetadata-contracts.md)
@@ -24,3 +25,4 @@
   - [Operación y despliegue](operations.md)
   - [Añadir un tema](adding-a-theme.md)
   - [Verificación en dos pasos](two-factor-authentication.md)
+  - [Importación de transacciones](importing-transactions.md)

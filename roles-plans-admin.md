@@ -14,7 +14,7 @@ marca) y "bloqueado" es un estado.
 | `BlockedAt`, `BlockedReason`, `BlockedByUserId`, `LastLoginAt` | datos del bloqueo y último acceso |
 | `TimeZoneId` | zona IANA del usuario (por defecto `Europe/Madrid`, sin interfaz): define dónde empieza "el día" del límite diario |
 | `ThemeId` | tema visual ([guía](adding-a-theme.md)) |
-| `Plans` | `Code` único (`basic`, `complimentary`), `IsBillable`, `IsActive`, `SortOrder`, `ShowAds`, `MaxDailyTransactions`, `MaxWallets`, `MaxAccounts` (`null` = ilimitado). Ids fijos en `PlanIds` |
+| `Plans` | `Code` único (`basic`, `complimentary`), `IsBillable`, `IsActive`, `SortOrder`, `ShowAds`, `MaxDailyTransactions`, `MaxWallets`, `MaxAccounts`, `MaxImportRows` (filas por importación de archivo; ver [Importación](importing-transactions.md)) (`null` = ilimitado). Ids fijos en `PlanIds` |
 | `AdminActionLog` | solo se añade (nunca se edita ni se borra): quién, sobre quién, acción, detalle, fecha |
 | `UserDailyUsage` | contador de transacciones manuales por usuario y día (ver abajo) |
 
