@@ -73,3 +73,12 @@ Sin flecha entrante = paquete base, sin dependencias de otro `Commons.*`/
 Cada página consolida el `README.md` real de su paquete (dentro de
 `EcoTrack/Commons/...`). Si algo queda desactualizado respecto al código, el
 `README.md` del paquete manda.
+
+## Galería
+
+Capturas de las demos en vivo de cada paquete (clic en el paquete para ver el detalle y la demo interactiva).
+
+| [UiMetadata.Elements](uimetadata-elements.md) | [UiMetadata.Modal](uimetadata-modal.md) | [UiMetadata.Charts](uimetadata-charts.md) |
+|---|---|---|
+| ![StatusCard](img/elements-statuscard.png ":size=260") | ![Confirm](img/modal-confirm.png ":size=260") | ![Chart de área](img/charts-area.png ":size=260") |
+| ![Botones](img/elements-actionbutton.png ":size=260") | ![Toasts](img/modal-toasts.png ":size=260") | ![KPI](img/charts-kpi.png ":size=260") |
