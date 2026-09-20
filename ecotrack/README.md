@@ -42,6 +42,23 @@ graph TD
 
 Una petición típica: `Controller → Handler → ICommonRepository → DbContext → SQL Server`.
 
+
+## Pantallas
+
+Capturas de EcoTrack con **datos de prueba** inventados (una cuenta demo, cuatro wallets, dos tarjetas con
+dígitos ficticios y 30 transacciones).
+
+| | |
+|---|---|
+| ![Dashboard](img/dashboard.png ":size=460") | ![Cuentas](img/cuentas-grid.png ":size=460") |
+| **Dashboard** — KPIs y gráficos ([Charts](../packages/uimetadata-charts.md)) | **Cuentas** — grilla ([Grid](../packages/uimetadata-grid.md)) |
+| ![Detalle de cuenta](img/cuenta-detalle.png ":size=460") | ![Transacciones](img/transacciones-grid.png ":size=460") |
+| **Detalle de cuenta** — subgrillas de wallets y tarjetas | **Transacciones** — importes con color y paginación |
+| ![Modal de cuenta](img/cuentas-modal.png ":size=460") | ![Modal de transacción](img/transacciones-modal.png ":size=460") |
+| **Modal de alta** generado por reflection ([Modal](../packages/uimetadata-modal.md)) | **Modal de transacción** con selects en cascada |
+
+La barra lateral de todas las capturas es [UiMetadata.Sidebar](../packages/uimetadata-sidebar.md).
+
 ## Guías
 
 - [Seguridad](security.md)
