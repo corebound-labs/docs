@@ -28,12 +28,12 @@ esa lógica a mano en cada Handler de guardado.
 ```
 
 ```csharp
-services.AddAuditableLogging<EcoTrackDbContext>(connectionString);
+services.AddAuditableLogging<AppDbContext>(connectionString);
 
-services.AddDbContext<EcoTrackDbContext>((sp, options) =>
+services.AddDbContext<AppDbContext>((sp, options) =>
 {
     options.UseSqlServer(connectionString);
-    options.AddAuditableInterceptor<EcoTrackDbContext>(sp);
+    options.AddAuditableInterceptor<AppDbContext>(sp);
 });
 ```
 
@@ -49,7 +49,7 @@ no existe (vía `ExecuteSqlRaw`).
 Sellos de auditoría sin log de columnas:
 
 ```csharp
-public class Account : BaseEntity<Guid>, IHasUpsertAudit, ISoftDeleteable
+public class Product : BaseEntity<Guid>, IHasUpsertAudit, ISoftDeleteable
 {
     public string? InsertUser { get; set; }
     public DateTime? InsertDate { get; set; }
@@ -63,7 +63,7 @@ Agregando además `IAuditable` (marcador vacío) se activa el log completo de
 columnas en `LOG__Audit`:
 
 ```csharp
-public class Transaction : BaseEntity<Guid>, IHasUpsertAudit, IAuditable { ... }
+public class Order : BaseEntity<Guid>, IHasUpsertAudit, IAuditable { ... }
 ```
 
 Ninguna de las dos requiere código adicional en el Handler.
@@ -105,11 +105,10 @@ entidad no espera a que se escriba el log de auditoría.
 `AuditInterceptor` sella estos campos con `GetId()` (el Id real, vía
 `ClaimTypes.NameIdentifier`) — no `GetName()` (`Identity.Name`, username/
 email de display). Es la única fuente de "quién hizo esto" comparable
-contra un `userId` real de dominio (ej. `Participant.UserId`).
+contra un `userId` real de dominio (ej. `Customer.UserId`).
 
 Antes de este fix usaban `GetName()`, un string de otro dominio no
-comparable — lo que llevó a que algunas entidades de EcoTrack (`Card`,
-`Transaction`, `ScheduledTransaction`) agregaran su propio
+comparable — lo que llevaba a que algunas entidades agregaran su propio
 `CreatedByUserId: string` en paralelo, duplicando lo que `InsertUser` ya
 debería haber cubierto. Ya no hace falta: `InsertUser` se fija una sola vez
 al insertar y nunca se reescribe en updates, así que sirve directamente

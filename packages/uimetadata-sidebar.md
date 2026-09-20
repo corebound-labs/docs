@@ -128,7 +128,7 @@ sidebarModel.StorageKey = "miApp.sidebar.collapsed"; // default: "uiMetadataSide
 ```
 
 Clave de `localStorage` donde se persiste si el sidebar quedó colapsado.
-Un consumidor que ya tenía la suya (ej. EcoTrack: `"ecotrack.sidebar.collapsed"`)
+Un consumidor que ya tenía la suya (ej. `"miapp.sidebar.collapsed"`)
 puede seguirla usando acá, para no perder el estado ya guardado de usuarios
 existentes al migrar.
 

@@ -71,11 +71,11 @@ la sigue resolviendo `grid.js`.)
 using UiMetadata.Contracts.Grid;
 using UiMetadata.Grid.Extensions;
 
-var config = GridConfigBuilder.Build<AccountViewModel>();
-return this.LoadGridPartial(accounts, config);
+var config = GridConfigBuilder.Build<ProductViewModel>();
+return this.LoadGridPartial(products, config);
 ```
 
-`BaseController.LoadPartial<T>` en EcoTrack ya envuelve esto.
+Si tu app tiene un `BaseController`, puede envolver esta llamada en un helper propio.
 
 ## Archivos a tocar/crear al integrarlo en un proyecto nuevo
 
@@ -92,7 +92,7 @@ adivinar); el resto tiene default razonable:
 
 | Global | Obligatorio | Usado por | Firma esperada |
 |---|---|---|---|
-| `loadEntityUrl` | Sí | `loadEntity` | string con placeholder `"Dummy"` a reemplazar por la acción, ej. `"/Account/Dummy"`. |
+| `loadEntityUrl` | Sí | `loadEntity` | string con placeholder `"Dummy"` a reemplazar por la acción, ej. `"/Product/Dummy"`. |
 | `saveEntityUrl` | Sí | submit del modal, `handleGridDeleteClick` (usa `.replace("/Save", "/Delete")`) | URL de POST para guardar. |
 | `showLoader` / `hideLoader` | No — default no-op | Varias funciones AJAX | `function(): void`. |
 | `loadEntityAction` | No — default: el nombre del tipo sin el sufijo `ViewModel` | `toggleInactiveFilter` | Nombre de la acción a pasar a `loadEntity`. Solo definilo si tu acción no sigue esa convención. |
@@ -107,19 +107,17 @@ adivinar); el resto tiene default razonable:
 ```csharp
 @await Html.PartialAsync("~/Views/Shared/_GridEntityConfig.cshtml", new UiMetadata.Grid.Models.GridEntityConfigModel
 {
-    Controller = "Account",       // resuelve loadEntityUrl y (salvo GetByIdController) getEntityUrl
-    LoadEntityAction = "Account", // solo si tu tipo no sigue la convención por defecto
+    Controller = "Product",       // resuelve loadEntityUrl y (salvo GetByIdController) getEntityUrl
+    LoadEntityAction = "Product", // solo si tu tipo no sigue la convención por defecto
 })
 ```
 
-`saveEntityUrl` sale siempre de `Common/Save` (así fue en las 4 vistas
-migradas en EcoTrack — Account/Index, Account/Details, Transaction/Index,
-Participant/Index — sin excepción, por eso no hace falta pasarlo). Los
+`saveEntityUrl` sale siempre de `Common/Save` (convención por defecto, por eso no hace falta pasarlo). Los
 demás campos (`LoadAction`, `GetByIdAction`, `GetByIdController`,
 `IncludeGetEntityUrl=false`) cubren las variantes reales entre controllers.
 
 **Qué NO centralizar acá, a propósito**: variables de una sola vista
-(`leaveAccountUrl`, `importEntityUrl`, `openNewView`, etc.) — no se repiten
+(`archiveProductUrl`, `importEntityUrl`, `openNewView`, etc.) — no se repiten
 entre pantallas, forzarlas a un mecanismo genérico agregaría indirección
 sin reducir duplicación real.
 
@@ -144,7 +142,7 @@ Por defecto el buscador (`_GridControls.cshtml`) matchea contra el texto
 completo de la fila. Para acotarlo a columnas específicas:
 
 ```csharp
-config.SearchableFields = [nameof(AccountViewModel.Name), nameof(AccountViewModel.Description)];
+config.SearchableFields = [nameof(ProductViewModel.Name), nameof(ProductViewModel.Description)];
 ```
 
 Con eso, `_GridControls.cshtml` agrega un botón "Columnas ▾" que despliega
@@ -183,7 +181,7 @@ de dígitos. No hay ningún atributo `[SortKey]` para resolverlo hoy.
 
 ```csharp
 [DefaultSort(Descending = true)]
-public DateOnly TransactionDate { get; set; }
+public DateOnly OrderDate { get; set; }
 ```
 
 El grid arranca ordenado por esa columna (mismo comparador de arriba) en
@@ -262,8 +260,8 @@ de esa zona en silencio, aunque no tenga contenido visible propio.
 El mini-modal de subgrid bloquea ciertos campos con `lockField(field)` en vez
 de `field.disabled = true` — un input `disabled` no viaja en el `FormData`
 del submit, así que bloquear un campo así lo excluía silenciosamente del
-guardado (causó bugs reales: "La billetera no existe" al editar una
-Transaction con un campo bloqueado). `lockField` usa `readOnly` en inputs de
+guardado (causó bugs reales: "La categoría no existe" al editar un
+Order con un campo bloqueado). `lockField` usa `readOnly` en inputs de
 texto/número, y la clase `.field-locked` (`pointer-events: none`) + `tabIndex
 = -1` en `<select>`/checkbox/radio, que no soportan `readonly`.
 `UiMetadata.Modal`'s `openFormModal` limpia los tres marcadores al resetear
@@ -313,7 +311,7 @@ crea un registro nuevo al guardar**, nunca sobreescribe la original. Off por
 defecto.
 
 ```csharp
-var config = GridConfigBuilder.Build<TransactionViewModel>(fkOptions);
+var config = GridConfigBuilder.Build<OrderViewModel>(fkOptions);
 config.GridCloneEnabled = true;
 ```
 
@@ -406,7 +404,7 @@ Los botones y controles de `_Grid`/`_GridControls` (crear, importar, buscar, fil
 
 ## Errores del servidor en el modal de guardado
 
-Si el POST de guardado responde con error, `showErrors` pinta los mensajes en el `modalErrors_{Entidad}` del modal. Lee, por este orden, `errors` (lista), `message` o `error` — este último es la forma en que los endpoints JSON de EcoTrack devuelven un error de negocio (`{ success: false, error }`). Antes solo miraba `errors` y `message`, así que esos errores no se veían (por ejemplo, el aviso de límite del plan alcanzado).
+Si el POST de guardado responde con error, `showErrors` pinta los mensajes en el `modalErrors_{Entidad}` del modal. Lee, por este orden, `errors` (lista), `message` o `error` — este último es una forma habitual de devolver un error de negocio desde un endpoint JSON (`{ success: false, error }`). Antes solo miraba `errors` y `message`, así que esos errores no se veían.
 
 ## Barra de filtros desplegables (`_GridFilters.cshtml`)
 

@@ -1,0 +1,11 @@
+- [← Inicio](/)
+- [🏠 Qué es EcoTrack](/ecotrack/)
+- [Qué paquetes usa y cómo](/ecotrack/uso-de-paquetes.md)
+
+- **Guías de la aplicación**
+  - [Seguridad](/ecotrack/security.md)
+  - [Roles, planes y panel admin](/ecotrack/roles-plans-admin.md)
+  - [Verificación en dos pasos](/ecotrack/two-factor-authentication.md)
+  - [Importación de transacciones](/ecotrack/importing-transactions.md)
+  - [Añadir un tema](/ecotrack/adding-a-theme.md)
+  - [Operación y despliegue](/ecotrack/operations.md)

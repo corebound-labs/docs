@@ -27,7 +27,7 @@ controller — `UiMetadata.Grid` lee estos atributos por reflection.
 ```csharp
 using UiMetadata.Contracts.Attributes;
 
-public class AccountViewModel
+public class ProductViewModel
 {
     [GridHidden][ModalHidden]
     public Guid Id { get; set; }
@@ -89,8 +89,8 @@ pasa con la fila:
 | `RowClickAction` | `"Modal"` / `"Details"` / `"None"` | `"Modal"` | Qué hace clickear la fila (fuera de los botones). |
 | `DetailsButtonAction` | `"Modal"` / `"Details"` / `"None"` | `"Details"` | Qué hace el botón de la fila (junto al de eliminar) — su ícono/título cambia según el valor: ✏️ "Editar" para `"Modal"`, 🔍 para `"Details"`. |
 
-Ejemplo (subgrids Wallet/Card se abren en modal, pero clickear la fila de
-una Account navega a `Account/Details`):
+Ejemplo (los subgrids de reseñas y variantes se abren en modal, pero clickear la fila de
+un Product navega a `Product/Details`):
 
 ```csharp
 config.RowClickAction = "Details";
@@ -103,13 +103,13 @@ Dos cosas que antes había que repetir a mano en cada `[HttpPost]` de cada
 controller y ahora se resuelven solas:
 
 1. **`ViewData["EntityTypeName"]`**: `LoadGridPartial<T>` lo autocompleta siempre como `typeof(T).Name` — nunca hace falta setearlo.
-2. **`ViewData["EntityTitle"]` / `config.ModalTitle`**: decorá la clase del ViewModel con `[DisplayName("cuenta")]` una sola vez y `GridConfigBuilder.Build<T>()` completa ambos. Si igual se setean a mano antes de `LoadPartial`, esas siguen ganando (el auto-fill solo entra si están vacías).
+2. **`ViewData["EntityTitle"]` / `config.ModalTitle`**: decorá la clase del ViewModel con `[DisplayName("producto")]` una sola vez y `GridConfigBuilder.Build<T>()` completa ambos. Si igual se setean a mano antes de `LoadPartial`, esas siguen ganando (el auto-fill solo entra si están vacías).
 
 `UiMetadata.Contracts.Builders.FkOptionsBuilder` tiene una sobrecarga con
 selectores (`Build(items, x => x.Id, x => x.Name)`) además de la de
 reflection por nombre de propiedad — necesaria para listas de tuplas con
 nombre (`List<(Guid Id, string Name)>`, común en los `Result` de los
-Handlers de `EcoTrack.Application`) donde la reflection por nombre falla
+Handlers/Services de la capa de aplicación) donde la reflection por nombre falla
 porque `Id`/`Name` no son propiedades reales del `ValueTuple` en runtime.
 
 ## Dependencias
