@@ -19,5 +19,8 @@
   - [UiMetadata.Charts](packages/uimetadata-charts.md)
 
 - **Guías**
+  - [Seguridad](security.md)
+  - [Roles, planes y panel admin](roles-plans-admin.md)
+  - [Operación y despliegue](operations.md)
   - [Añadir un tema](adding-a-theme.md)
   - [Verificación en dos pasos](two-factor-authentication.md)
