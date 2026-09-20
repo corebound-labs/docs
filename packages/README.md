@@ -8,9 +8,9 @@
 Hay dos familias:
 
 - **`Commons.*`** — Class Libraries de backend, sin UI:
-  [CrudOrm](/packages/commons-crudorm.md), [Infisical](/packages/commons-infisical.md), [AuditableLogging](/packages/commons-auditablelogging.md), [ExceptionHandler](/packages/commons-exceptionhandler.md), [Email](/packages/commons-email.md), [Testing](/packages/commons-testing.md), [BackgroundJobs](/packages/commons-backgroundjobs.md), [Logging](/packages/commons-logging.md), [Importing](/packages/commons-importing.md).
+  [CrudOrm](/packages/commons-crudorm.md), [Infisical](/packages/commons-infisical.md), [AuditableLogging](/packages/commons-auditablelogging.md), [ExceptionHandler](/packages/commons-exceptionhandler.md), [Email](/packages/commons-email.md), [Testing](/packages/commons-testing.md), [BackgroundJobs](/packages/commons-backgroundjobs.md), [Logging](/packages/commons-logging.md), [Importing](/packages/commons-importing.md), [Notifications](/packages/commons-notifications.md).
 - **`UiMetadata.*`** — Razor Class Libraries de UI:
-  [Contracts](/packages/uimetadata-contracts.md), [Grid](/packages/uimetadata-grid.md), [Modal](/packages/uimetadata-modal.md), [Elements](/packages/uimetadata-elements.md), [Sidebar](/packages/uimetadata-sidebar.md), [Charts](/packages/uimetadata-charts.md).
+  [Contracts](/packages/uimetadata-contracts.md), [Grid](/packages/uimetadata-grid.md), [Modal](/packages/uimetadata-modal.md), [Elements](/packages/uimetadata-elements.md), [Sidebar](/packages/uimetadata-sidebar.md), [Charts](/packages/uimetadata-charts.md), [Notifications](/packages/uimetadata-notifications.md).
 
 Cada página sigue la misma estructura: qué es, cuándo usarlo, instalación,
 ejemplo mínimo, archivos a tocar y dependencias.
@@ -26,6 +26,7 @@ graph TD
         Grid[Grid]
         Sidebar[Sidebar]
         Charts[Charts]
+        UiNotifications[Notifications]
     end
     subgraph "Commons.* (backend)"
         CrudOrm[CrudOrm]
@@ -37,6 +38,7 @@ graph TD
         Jobs[BackgroundJobs]
         Logging[Logging]
         Importing[Importing]
+        Notifications[Notifications]
     end
 
     Grid --> Contracts
@@ -46,6 +48,8 @@ graph TD
     Testing --> CrudOrm
     Testing -.->|"solo namespace, sin ProjectReference"| Audit
     Logging --> Jobs
+    Notifications --> Jobs
+    UiNotifications --> Notifications
     Logging -.->|"por convención de clave, sin ProjectReference"| ExcHandler
 
     click Contracts "#/packages/uimetadata-contracts"
@@ -63,6 +67,8 @@ graph TD
     click Jobs "#/packages/commons-backgroundjobs"
     click Logging "#/packages/commons-logging"
     click Importing "#/packages/commons-importing"
+    click Notifications "#/packages/commons-notifications"
+    click UiNotifications "#/packages/uimetadata-notifications"
 ```
 
 Sin flecha entrante = paquete base, sin dependencias de otro `Commons.*`/

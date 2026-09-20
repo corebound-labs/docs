@@ -12,10 +12,10 @@ Importar archivo**. No usa IA: la lectura y la detección de columnas son reglas
    abono, saldo, ignorar) y el orden de la fecha (día/mes o mes/día). La detección ignora la puntuación de las cabeceras ("F. Valor" es una fecha). Opción **omitir duplicados** (activa por defecto).
 3. **Vista previa:** cada fila queda como *Nueva*, *Duplicada* o *Error* (con el motivo), con los totales de ingresos y
    gastos. Nada se guarda todavía.
-4. **Resultado:** importadas, omitidas por duplicadas, con error y las que fallaron al guardar (con su fila). Mientras se
-   guarda se muestra un indicador de progreso y se puede **cerrar la ventana y seguir usando la app**: al terminar sale un aviso
-   (toast) y la grilla se actualiza. Si el usuario recarga o cambia de página no recibe el aviso, aunque el servidor termina
-   igualmente.
+4. **Resultado:** al confirmar, el servidor **encola** la importación y la procesa en segundo plano. El asistente muestra un
+   indicador de progreso y, al terminar, importadas, omitidas por duplicadas, con error y las que fallaron al guardar (con su
+   fila). Se puede **cerrar la ventana ("Seguir en segundo plano") y seguir usando la app**, incluso recargar o cambiar de página:
+   al terminar llega una [notificación](notifications.md) (`import.finished` / `import.failed`) con un toast y la grilla se refresca sola.
 
 
 ## Diagrama del flujo
@@ -36,23 +36,40 @@ sequenceDiagram
     C-->>B: filas Nueva / Duplicada / Error (sin guardar)
     U->>B: confirma
     B->>C: POST Import (archivo + mapeo)
-    C-->>B: importadas, omitidas, con error
+    C-->>B: 202 Accepted (jobId) - queda en cola
+    Note over C: ImportJobWorker procesa la cola
+    B->>C: GET ImportStatus (mientras el asistente esté abierto)
+    C-->>B: en cola / en curso / completada / fallida
+    C--)U: notificación "Importación terminada" (SignalR)
 ```
 
-El navegador reenvía el archivo en cada paso: el servidor no guarda estado.
+El navegador reenvía el archivo en cada paso hasta el último; la importación en sí se guarda como un trabajo (`ImportJob`) con las filas ya interpretadas.
 
 ## Cómo funciona (backend)
-Sin estado en el servidor: el navegador conserva el archivo y lo **reenvía en cada paso**, así no hay nada que caducar ni
-limpiar. Endpoints de `TransactionImportController` (todos `[Authorize]`, con el token CSRF de siempre):
+Los pasos de lectura no tienen estado en el servidor: el navegador conserva el archivo y lo **reenvía en cada paso**, así no hay
+nada que caducar ni limpiar. Endpoints de `TransactionImportController` (todos `[Authorize]`, con el token CSRF de siempre):
 
 | Endpoint | Qué hace |
 |---|---|
 | `GET Options` | billeteras donde puede crear (mismo criterio que el alta manual) y tope de filas del plan |
 | `POST Analyze` | lee el archivo y devuelve cabecera, columnas propuestas y una muestra; con `headerRow` recalcula para otra fila |
 | `POST Preview` | interpreta con el mapeo elegido y clasifica cada fila (sin guardar) |
-| `POST Import` | igual que Preview y guarda |
+| `POST Import` | valida acceso (permiso, cuenta cerrada, archivo vacío), rechaza una segunda importación en curso del mismo usuario y billetera, guarda el trabajo y responde `202` con su `jobId` |
+| `GET ImportStatus?id=` | estado del trabajo (`queued`/`running`/`completed`/`failed`), contadores y fallos; solo el propio usuario |
 
-La lógica vive en `Features/Transactions/ImportTransactions` (`ImportFileService`, `ImportTransactionsHandler`).
+La lógica vive en `Features/Transactions/ImportTransactions` (`ImportFileService`, `ImportTransactionsHandler`) y, para el segundo plano, en
+`Features/Transactions/ImportJobs` (`ImportJobService`, `ProcessImportJobHandler`, cola `ImportJobQueue`) más `ImportJobWorker` en `EcoTrack.Infrastructure`.
+
+## Segundo plano
+- **Cola en memoria + tabla `ImportJob`** (migración `AddImportJobs`): guarda estado, contadores, fallos y las filas ya interpretadas mientras
+  esperan (se borran al terminar). Un **único worker** procesa de una en una; cada importación corre en un *scope* propio para que un
+  fallo a mitad de un guardado no contamine el guardado del estado.
+- **Auditoría:** sin petición HTTP no hay usuario en el contexto, así que `IdentityService.ImpersonateUser` (AsyncLocal) atribuye
+  `InsertUser` a quien pidió la importación. Sin eso las transacciones quedarían con `UnknownUser`.
+- **Reinicio del servidor:** al arrancar, las importaciones **en cola** se reanudan y las que estaban **en curso** se marcan como
+  fallidas y se avisa al usuario. **No se reejecutan**: podrían duplicar movimientos (el guardado es atómico, pero no se sabe si
+  llegó a confirmarse antes del corte).
+- Si el asistente sigue abierto consulta `ImportStatus` cada 1,5 s (máximo 15 min); si se cierra, manda la notificación.
 
 ## Reglas
 - **Se guarda con `SaveTransactionHandler.HandleNewBatchAsync`**: mismas reglas que una transacción manual sin participantes
@@ -69,6 +86,7 @@ La lógica vive en `Features/Transactions/ImportTransactions` (`ImportFileServic
   (`5402XXXXXXXX4021`) también se **quitan del concepto** al importar; la huella los ignora, así que coincide con lo ya
   guardado con tarjeta. Se compara como
   multiconjunto: dos cafés idénticos el mismo día son legítimos, y solo se descartan tantos como ya existan.
+- **Errores:** los de negocio al procesar (límite del plan, permiso, cuenta cerrada) fallan el trabajo con su mensaje; los inesperados se registran y el usuario solo ve un texto genérico, sin detalles internos.
 - **Errores por fila:** una fila mala (fecha o importe no válidos, concepto vacío) se informa y no detiene al resto. Un error
   de negocio al guardar una fila también se informa y se sigue.
 - **Permisos:** hace falta permiso de edición en la billetera y que la cuenta no esté cerrada, comprobado en servidor.
@@ -79,8 +97,9 @@ La lógica vive en `Features/Transactions/ImportTransactions` (`ImportFileServic
 - Asignar **tarjeta** a lo importado (hoy va sin tarjeta) y **categorización por reglas** (ver la propuesta de fase 2).
 - Perfiles de mapeo guardados por banco, para no repetir el paso 2.
 - Probarlo con extractos reales de cada banco.
-- Importación en segundo plano real (tarea en el servidor con progreso y notificación aunque el usuario navegue).
+- Las transacciones generadas por plantillas programadas siguen quedando con `InsertUser = UnknownUser` (comportamiento previo); `ImpersonateUser` permitiría corregirlo.
+- Progreso parcial ("1200 de 1700") en el asistente: hoy solo hay estado, no avance.
 - La fase de clasificación (duplicados) carga los movimientos existentes del rango de fechas del archivo; con historiales muy
   grandes convendría consultar por huella en BD.
 
-Migración: `AddPlanMaxImportRows` (columna `Plans.MaxImportRows`; ver [Roles, planes y panel admin](roles-plans-admin.md)).
+Migraciones: `AddPlanMaxImportRows` (columna `Plans.MaxImportRows`; ver [Roles, planes y panel admin](roles-plans-admin.md)) y `AddImportJobs` (tabla `ImportJob`).

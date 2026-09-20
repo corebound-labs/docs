@@ -11,6 +11,7 @@
   - [Commons.BackgroundJobs](/packages/commons-backgroundjobs.md)
   - [Commons.Logging](/packages/commons-logging.md)
   - [Commons.Importing](/packages/commons-importing.md)
+  - [Commons.Notifications](/packages/commons-notifications.md)
 
 - **UiMetadata.\* — UI (Razor Class Libraries)**
   - [UiMetadata.Contracts](/packages/uimetadata-contracts.md)
@@ -19,3 +20,4 @@
   - [UiMetadata.Elements](/packages/uimetadata-elements.md)
   - [UiMetadata.Sidebar](/packages/uimetadata-sidebar.md)
   - [UiMetadata.Charts](/packages/uimetadata-charts.md)
+  - [UiMetadata.Notifications](/packages/uimetadata-notifications.md)
