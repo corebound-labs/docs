@@ -19,3 +19,7 @@
   - [UiMetadata.Elements](/packages/uimetadata-elements.md)
   - [UiMetadata.Sidebar](/packages/uimetadata-sidebar.md)
   - [UiMetadata.Charts](/packages/uimetadata-charts.md)
+  - [UiMetadata.Notifications](/packages/uimetadata-notifications.md)
+
+- **Notificaciones**
+  - [Commons.Notifications](/packages/commons-notifications.md)

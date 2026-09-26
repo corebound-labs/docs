@@ -63,6 +63,10 @@ La página de bandeja (`/notifications`) usa el layout del consumidor y necesita
   marcar todas y eliminar. Sin él cae a `fetch` a secas (solo válido si el host no exige token).
 - **Marcar como leído al abrir un aviso:** es optimista (contador y fila al instante) y va con `keepalive`, porque el mismo clic
   suele navegar a otra página y una petición normal se abortaría antes de llegar al servidor.
+- **Icono por severidad:** `severityIcon()` pinta un SVG de línea (no emoji) según `info`/`success`/`warning`/`error`, con fondo
+  tintado (`color-mix` sobre el color del tema) y color `currentColor`. Se centra verticalmente contra toda la tarjeta
+  (título + cuerpo + hora), no solo contra la primera línea, para que un cuerpo de varias líneas no lo deje "alto". El punto de
+  no leído es un marcador independiente, anclado a la esquina superior derecha de la tarjeta.
 
 ## Seguridad
 - Título y cuerpo se pintan siempre con `textContent`.
