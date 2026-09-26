@@ -20,7 +20,6 @@ Importar archivo**. No usa IA: la lectura y la detección de columnas son reglas
    [Commons.Notifications](../packages/commons-notifications.md) (`import.finished`), así que aunque el usuario haya recargado o
    cambiado de página, lo ve en la campana.
 
-
 ## Diagrama del flujo
 
 ```mermaid
@@ -39,14 +38,18 @@ sequenceDiagram
     C-->>B: filas Nueva / Duplicada / Error (sin guardar)
     U->>B: confirma
     B->>C: POST Import (archivo + mapeo)
-    C-->>B: importadas, omitidas, con error
+    C-->>B: 202 Accepted (jobId) - queda en cola
+    Note over C: ImportJobWorker procesa la cola
+    B->>C: GET ImportStatus (mientras el asistente esté abierto)
+    C-->>B: en cola / en curso / completada / fallida
+    C--)U: notificación "Importación terminada" (SignalR)
 ```
 
-El navegador reenvía el archivo en cada paso: el servidor no guarda estado.
+El navegador reenvía el archivo en cada paso hasta el último; la importación en sí se guarda como un trabajo (`ImportJob`) con las filas ya interpretadas.
 
 ## Cómo funciona (backend)
-Sin estado en el servidor: el navegador conserva el archivo y lo **reenvía en cada paso**, así no hay nada que caducar ni
-limpiar. Endpoints de `TransactionImportController` (todos `[Authorize]`, con el token CSRF de siempre):
+Los pasos de lectura no tienen estado en el servidor: el navegador conserva el archivo y lo **reenvía en cada paso**, así no hay
+nada que caducar ni limpiar. Endpoints de `TransactionImportController` (todos `[Authorize]`, con el token CSRF de siempre):
 
 | Endpoint | Qué hace |
 |---|---|
@@ -77,6 +80,7 @@ solo los que quedaron en `Queued` se reprocesan.
   (`5402XXXXXXXX4021`) también se **quitan del concepto** al importar; la huella los ignora, así que coincide con lo ya
   guardado con tarjeta. Se compara como
   multiconjunto: dos cafés idénticos el mismo día son legítimos, y solo se descartan tantos como ya existan.
+- **Errores:** los de negocio al procesar (límite del plan, permiso, cuenta cerrada) fallan el trabajo con su mensaje; los inesperados se registran y el usuario solo ve un texto genérico, sin detalles internos.
 - **Errores por fila:** una fila mala (fecha o importe no válidos, concepto vacío) se informa y no detiene al resto. Un error
   de negocio al guardar una fila también se informa y se sigue.
 - **Permisos:** hace falta permiso de edición en la billetera y que la cuenta no esté cerrada, comprobado en servidor.
@@ -90,4 +94,4 @@ solo los que quedaron en `Queued` se reprocesan.
 - La fase de clasificación (duplicados) carga los movimientos existentes del rango de fechas del archivo; con historiales muy
   grandes convendría consultar por huella en BD.
 
-Migración: `AddPlanMaxImportRows` (columna `Plans.MaxImportRows`; ver [Roles, planes y panel admin](roles-plans-admin.md)).
+Migraciones: `AddPlanMaxImportRows` (columna `Plans.MaxImportRows`; ver [Roles, planes y panel admin](roles-plans-admin.md)) y `AddImportJobs` (tabla `ImportJob`).

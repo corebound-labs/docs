@@ -19,6 +19,7 @@ La documentación genérica (instalación, API, ejemplos) está en
 | [UiMetadata.Grid](../packages/uimetadata-grid.md) | `BaseController.LoadPartial<T>` envuelve `LoadGridPartial`. `saveEntityUrl` = `Common/Save` en las 4 vistas migradas (Account/Index, Account/Details, Transaction/Index, Participant/Index). Variables de una sola vista como `leaveAccountUrl`, `importEntityUrl`, `openNewView` no se centralizan. Los endpoints JSON devuelven errores de negocio como `{ success: false, error }` (p. ej. límite del plan). |
 | [UiMetadata.Modal](../packages/uimetadata-modal.md) | Las 5 entidades implementan `openEntityModal` (tabla abajo). |
 | [UiMetadata.Sidebar](../packages/uimetadata-sidebar.md) | Clave de `localStorage` conservada: `"ecotrack.sidebar.collapsed"`. |
+| [UiMetadata.Notifications](../packages/uimetadata-notifications.md) | Campana en la barra superior de `_Layout.cshtml` (solo con sesión), `MapNotificationsHub()` y `AddUiMetadataNotifications()`. La grilla de transacciones escucha el evento `uinotification` para refrescarse al terminar una importación. |
 | [UiMetadata.Charts](../packages/uimetadata-charts.md) | Layout propio `.chart-grid-top`/`.chart-grid-bot` (2.5fr/1.5fr). |
 | [UiMetadata.Contracts](../packages/uimetadata-contracts.md) | Subgrids Wallet/Card abren en modal; clickear una fila de Account navega a `Account/Details`. Los `Result` de los Handlers de `EcoTrack.Application` usan tuplas con nombre (`FkOptionsBuilder` con selectores). |
 

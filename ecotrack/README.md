@@ -65,6 +65,7 @@ La barra lateral de todas las capturas es [UiMetadata.Sidebar](/packages/uimetad
 - [Roles, planes y panel admin](/ecotrack/roles-plans-admin.md)
 - [Verificación en dos pasos](/ecotrack/two-factor-authentication.md)
 - [Importación de transacciones](/ecotrack/importing-transactions.md)
+- [Notificaciones](/ecotrack/notifications.md)
 - [Añadir un tema](/ecotrack/adding-a-theme.md)
 - [Operación y despliegue](/ecotrack/operations.md)
 
