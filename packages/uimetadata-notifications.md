@@ -57,8 +57,16 @@ La página de bandeja (`/notifications`) usa el layout del consumidor y necesita
   puede reaccionar a tipos concretos sin acoplarse al script; p. ej. EcoTrack refresca la grilla de transacciones con `import.finished`:
   `document.addEventListener("uinotification", e => { if (e.detail.type === "import.finished") refrescar(); })`.
 - **Varias campanas / bandeja en la misma página** comparten el contador.
-- **Antiforgery:** las acciones de escritura son POST, así que heredan el filtro global de la app; el `fetch` del layout ya
-  añade el token en cabecera.
+- **Antiforgery:** las acciones de escritura son POST, así que heredan el filtro global de la app. El JS las envía con
+  `window.uiMetadataFetch` (el punto de extensión común de los paquetes `UiMetadata.*`, donde el host añade el token antiforgery en
+  la cabecera); **el host debe definirlo antes de cargar `notifications.js`**, o el servidor rechazará con 400 marcar como leído,
+  marcar todas y eliminar. Sin él cae a `fetch` a secas (solo válido si el host no exige token).
+- **Marcar como leído al abrir un aviso:** es optimista (contador y fila al instante) y va con `keepalive`, porque el mismo clic
+  suele navegar a otra página y una petición normal se abortaría antes de llegar al servidor.
+- **Icono por severidad:** `severityIcon()` pinta un SVG de línea (no emoji) según `info`/`success`/`warning`/`error`, con fondo
+  tintado (`color-mix` sobre el color del tema) y color `currentColor`. Se centra verticalmente contra toda la tarjeta
+  (título + cuerpo + hora), no solo contra la primera línea, para que un cuerpo de varias líneas no lo deje "alto". El punto de
+  no leído es un marcador independiente, anclado a la esquina superior derecha de la tarjeta.
 
 ## Seguridad
 - Título y cuerpo se pintan siempre con `textContent`.

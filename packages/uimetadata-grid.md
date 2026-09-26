@@ -48,6 +48,11 @@ Paginador, cabeceras y filas por página llaman a `loadEntity` con esos parámet
 loader global y conserva foco y cursor. `loadEntity` descarta respuestas obsoletas (solo se pinta la última petición) y
 acepta `{ silent: true }` como quinto argumento para no mostrar el loader.
 
+**Refresco en segundo plano:** `refreshGrid(containerId, { silent: true })` recarga la grilla sin el loader de pantalla completa y
+conservando el scroll. Úsalo cuando el refresco lo dispara un evento externo (p. ej. una notificación): recargar el HTML destruye el
+modal de crear/editar que vive dentro de la grilla, así que quien lo llame debe esperar a que el usuario no esté escribiendo ni tenga
+un modal abierto (ver `Transaction/Index.cshtml`).
+
 **Ojo:** el orden por una columna calculada (que no existe en BD) debe caer a un orden por defecto en el servidor.
 
 ## Instalación
