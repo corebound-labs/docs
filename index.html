@@ -6,6 +6,24 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <style>
+    /* En pantalla estrecha, el .app-nav de Docsify va position:absolute y,
+       con textos largos (con emoji) como los de _navbar.md, hace wrap a dos
+       líneas y se solapa con el título de la página (el .content de abajo
+       solo tiene padding-top:20px ahí). Se ve en Safari de iPhone; el
+       problema es el ancho, no el navegador. Pasarlo a flujo normal (static)
+       en mobile evita el solape sin tocar el contenido del navbar. */
+    @media screen and (max-width: 768px) {
+      .app-nav {
+        position: static;
+        margin: 16px 16px 0;
+        text-align: left;
+      }
+      .content {
+        padding-top: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="app"></div>
