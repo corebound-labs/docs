@@ -3,6 +3,8 @@
 - [Qué paquetes usa y cómo](/ecotrack/uso-de-paquetes.md)
 
 - **Guías de la aplicación**
+  - [Primeros pasos: cuentas y transacciones](/ecotrack/getting-started.md)
+  - [Contactos y gastos compartidos](/ecotrack/shared-expenses.md)
   - [Seguridad](/ecotrack/security.md)
   - [Roles, planes y panel admin](/ecotrack/roles-plans-admin.md)
   - [Verificación en dos pasos](/ecotrack/two-factor-authentication.md)
