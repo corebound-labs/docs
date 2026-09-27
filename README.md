@@ -9,7 +9,7 @@ Este sitio tiene **dos áreas separadas**. Usá las pestañas de arriba.
 | **Conocen el dominio** | **No.** No saben qué es una cuenta ni una transacción | **Sí.** Cuentas, wallets, tarjetas, transacciones, planes |
 | **Se reutilizan** | Sí, en cualquier proyecto .NET | No, es un producto |
 | **Ejemplos de código** | Genéricos (Product, Order…), pensados para copiar a cualquier app | Los del propio código de EcoTrack |
-| **Dónde está el código** | `EcoTrack/Commons/...` (hoy dentro del repo de EcoTrack, listos para extraerse) | `EcoTrack/EcoTrack.*` |
+| **Dónde está el código** | Repo propio `Commons` (`Commons/Commons.*`, `Commons/UiMetadata.*`), publicado como paquetes NuGet versionados | `EcoTrack/EcoTrack.*` |
 
 ## ¿Qué busco?
 
