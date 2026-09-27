@@ -1,0 +1,15 @@
+{
+  "name": "corebound-docs-pdf",
+  "private": true,
+  "type": "module",
+  "description": "Genera PDFs (guía de EcoTrack y catálogo de paquetes) a partir del sitio Docsify de este repo.",
+  "scripts": {
+    "pdf:all": "node generate.mjs --target all",
+    "pdf:ecotrack": "node generate.mjs --target ecotrack",
+    "pdf:packages": "node generate.mjs --target packages"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^23.0.0"
+  }
+}
