@@ -12,6 +12,8 @@
   - [Commons.Logging](/packages/commons-logging.md)
   - [Commons.Importing](/packages/commons-importing.md)
   - [Commons.Notifications](/packages/commons-notifications.md)
+  - [Commons.Notifications.Email](/packages/commons-notifications-email.md)
+  - [Commons.CronDescription](/packages/commons-crondescription.md)
 
 - **UiMetadata.\* — UI (Razor Class Libraries)**
   - [UiMetadata.Contracts](/packages/uimetadata-contracts.md)

@@ -8,7 +8,7 @@
 Hay dos familias:
 
 - **`Commons.*`** — Class Libraries de backend, sin UI:
-  [CrudOrm](/packages/commons-crudorm.md), [Infisical](/packages/commons-infisical.md), [AuditableLogging](/packages/commons-auditablelogging.md), [ExceptionHandler](/packages/commons-exceptionhandler.md), [Email](/packages/commons-email.md), [Testing](/packages/commons-testing.md), [BackgroundJobs](/packages/commons-backgroundjobs.md), [Logging](/packages/commons-logging.md), [Importing](/packages/commons-importing.md), [Notifications](/packages/commons-notifications.md).
+  [CrudOrm](/packages/commons-crudorm.md), [Infisical](/packages/commons-infisical.md), [AuditableLogging](/packages/commons-auditablelogging.md), [ExceptionHandler](/packages/commons-exceptionhandler.md), [Email](/packages/commons-email.md), [Testing](/packages/commons-testing.md), [BackgroundJobs](/packages/commons-backgroundjobs.md), [Logging](/packages/commons-logging.md), [Importing](/packages/commons-importing.md), [Notifications](/packages/commons-notifications.md), [Notifications.Email](/packages/commons-notifications-email.md), [CronDescription](/packages/commons-crondescription.md).
 - **`UiMetadata.*`** — Razor Class Libraries de UI:
   [Contracts](/packages/uimetadata-contracts.md), [Grid](/packages/uimetadata-grid.md), [Modal](/packages/uimetadata-modal.md), [Elements](/packages/uimetadata-elements.md), [Sidebar](/packages/uimetadata-sidebar.md), [Charts](/packages/uimetadata-charts.md), [Notifications](/packages/uimetadata-notifications.md).
 
@@ -78,9 +78,10 @@ Sin flecha entrante = paquete base, sin dependencias de otro `Commons.*`/
 
 ## Fuente de verdad
 
-Cada página consolida el `README.md` real de su paquete (dentro de
-`EcoTrack/Commons/...`). Si algo queda desactualizado respecto al código, el
-`README.md` del paquete manda.
+Cada página consolida el `README.md` real de su paquete, que vive en el repo
+propio `Commons` (`Commons/Commons.*`, `Commons/UiMetadata.*`) y se consume
+desde EcoTrack como paquete NuGet versionado. Si algo queda desactualizado
+respecto al código, el `README.md` del paquete en el repo `Commons` manda.
 
 ## Galería
 
