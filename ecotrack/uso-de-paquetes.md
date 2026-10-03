@@ -21,7 +21,7 @@ La documentación genérica (instalación, API, ejemplos) está en
 | [UiMetadata.Sidebar](../packages/uimetadata-sidebar.md) | Clave de `localStorage` conservada: `"ecotrack.sidebar.collapsed"`. |
 | [UiMetadata.Notifications](../packages/uimetadata-notifications.md) | Campana en la barra superior de `_Layout.cshtml` (solo con sesión), `MapNotificationsHub()` y `AddUiMetadataNotifications()`. La grilla de transacciones escucha el evento `uinotification` para refrescarse al terminar una importación. |
 | [UiMetadata.Charts](../packages/uimetadata-charts.md) | Layout propio `.chart-grid-top`/`.chart-grid-bot` (2.5fr/1.5fr). |
-| [UiMetadata.Contracts](../packages/uimetadata-contracts.md) | Subgrids Wallet/Card abren en modal; clickear una fila de Account navega a `Account/Details`. Los `Result` de los Handlers de `EcoTrack.Application` usan tuplas con nombre (`FkOptionsBuilder` con selectores). |
+| [UiMetadata.Contracts](../packages/uimetadata-contracts.md) | Subgrids Wallet/Card abren en modal; clickear una fila de Account navega a `Account/Details`. Los `Result` de los Handlers de `EcoTrack.Application` usan tuplas con nombre (`FkOptionsBuilder` con selectores). Los campos de texto editables de los ViewModels llevan `[StringLength(FieldLimits.X)]`, así que el modal frena el tipeo en el límite de la columna (ver [Validación del largo de los textos](/ecotrack/text-length-validation.md)). |
 
 ## `openEntityModal`: entidades y filtro de acceso
 

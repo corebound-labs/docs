@@ -8,6 +8,8 @@
   - [Verificación en dos pasos](/ecotrack/two-factor-authentication.md)
   - [Importación de transacciones](/ecotrack/importing-transactions.md)
   - [Exportación de transacciones](/ecotrack/exporting-transactions.md)
+  - [Ajuste manual de saldo](/ecotrack/balance-adjustment.md)
+  - [Validación del largo de los textos](/ecotrack/text-length-validation.md)
   - [Notificaciones](/ecotrack/notifications.md)
   - [Añadir un tema](/ecotrack/adding-a-theme.md)
   - [Operación y despliegue](/ecotrack/operations.md)
