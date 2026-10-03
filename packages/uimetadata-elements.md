@@ -225,6 +225,14 @@ que no eran una llamada simple.
 (`_TextAreaInput` usa además `Rows`, default 3). Los tres primeros llevan
 `autocomplete="off"` fijo.
 
+`SimpleInputModel.MaxLength` (`int?`) lo leen `_TextInput` y `_TextAreaInput`
+y lo renderizan como el atributo HTML `maxlength`: el navegador frena el
+tipeo en el límite. `null` (default) = sin límite. En el modal que arma
+`UiMetadata.Grid` sale solo del `[StringLength]` o `[MaxLength]` estándar
+(`System.ComponentModel.DataAnnotations`) de la propiedad del ViewModel — si
+están los dos, el menor —, sin atributo propio de la librería. Es una ayuda de
+UX, no una validación: el servidor tiene que validar igual.
+
 ### `_NumberInput.cshtml` — decimal regionalizado, no `<input type="number">` nativo
 
 `type="number"` nativo siempre usa `.` como decimal sin importar el idioma

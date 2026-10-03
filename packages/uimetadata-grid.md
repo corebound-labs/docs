@@ -188,6 +188,22 @@ empiezan marcadas; "todas marcadas" y "ninguna marcada" se tratan igual
 (buscar en toda la fila). `SearchableFields = null` (default) = sin
 dropdown, buscador de siempre.
 
+**Panel de columnas.** Arriba de la lista hay un **"Seleccionar todo"**
+(`<input data-select-all>`) que marca o desmarca todas las columnas de una
+vez; queda en estado intermedio si hay algunas marcadas y otras no, y no
+cuenta como columna de búsqueda. El panel **no se cierra al marcar una
+casilla**: se cierra con un clic afuera o con `Escape`.
+
+Con paginación en servidor (`data-server-paging`) cada casilla pedía una
+página nueva y `loadEntity` repinta el contenedor entero con `innerHTML`,
+lo que recreaba el panel cerrado. Ahora, sin texto en el buscador, marcar
+columnas **no recarga** (no cambia el resultado; la selección igual se guarda
+y viaja en el próximo pedido), y con una búsqueda activa sí recarga pero
+`loadEntity` recuerda los paneles abiertos y los reabre después de repintar.
+Limitación conocida: en modo servidor con búsqueda activa, desmarcar todo y
+recargar vuelve a mostrarlas todas marcadas (el servidor no distingue
+"ninguna" de "todas"; ambas buscan en toda la fila).
+
 **Limpiar búsqueda**: botón ✕ (`.search-clear`, solo visible con texto) y
 `Escape` en el input vacían el buscador y devuelven el foco.
 
