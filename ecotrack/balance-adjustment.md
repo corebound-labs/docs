@@ -33,7 +33,7 @@ transacción más, con estas particularidades:
 - Suma al saldo, pero **no cuenta como ingreso ni gasto** en el dashboard ni en los gráficos.
 - Lleva un `Operation` de tipo `BalanceAdjustment`, el mismo mecanismo que usan las transferencias entre billeteras propias
   (`OwnTransfer`); no hay cambios de esquema.
-- Si le pasas una fecha anterior (no hay selector hoy: siempre es la de hoy), solo contaría los movimientos hasta ese día.
+- Se fecha **hoy**: todavía no hay selector de fecha. El saldo con el que se compara cuenta los movimientos hasta hoy inclusive, no los futuros.
 
 ## Reglas y límites
 
