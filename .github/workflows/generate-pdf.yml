@@ -15,11 +15,11 @@ on:
 
 jobs:
   build-pdf:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
 
@@ -32,7 +32,7 @@ jobs:
         run: node generate.mjs --target ${{ inputs.target }}
 
       - name: Publicar PDF(s) como artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: docs-pdf-${{ inputs.target }}-${{ github.run_number }}
           path: pdf/output/*.pdf
