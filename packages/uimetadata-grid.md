@@ -210,8 +210,9 @@ recargar vuelve a mostrarlas todas marcadas (el servidor no distingue
 ## Orden por columna (click en el header, "como Excel")
 
 Cualquier header de columna con datos reales (no las de acción, ni la
-sintética `ButtonForURL`) es clickeable y ordena el grid — el ícono pasa de
-`↕` a `▲`/`▼` según la dirección. Mismo campo = alterna asc/desc; campo
+sintética `ButtonForURL`) es clickeable y ordena el grid — el ícono (un SVG de dos
+triángulos, no el carácter `↕`, que iOS y Android dibujan como un emoji de color) deja encendido solo el triángulo `▲` o
+`▼` según la dirección, mediante las clases `sorted-asc`/`sorted-desc` de la celda. Mismo campo = alterna asc/desc; campo
 distinto = arranca en ascendente. Sin tercer estado "sin ordenar" a
 propósito (dos clicks alcanzan).
 
@@ -280,6 +281,12 @@ iPhone 13 mini (375px) / 14 Pro (390px) cada columna mide ~76-81px y
 un flex centrado). Ahora usa `justify-content: safe center`. Grids con muchas
 columnas deben marcar las prescindibles con `[GridPriority]`; sin prioridades,
 13 columnas se apretaban a ~17px cada una.
+
+## Texto en dos renglones en móvil (≤599px)
+
+Las celdas de **texto libre** (descripciones, nombres: las que llevan la clase `table-cell-text`) se muestran en **hasta dos
+renglones** con "…" al final del segundo, en vez de cortarse en el primero. Las filas ya miden `3.7rem` como mínimo, así que
+dos líneas caben sin agrandarlas. Importes, fechas e íconos siguen en una sola línea.
 
 ## Barra de controles en mobile: buscador colapsable, menú de filas, "+ Crear" como ícono
 
