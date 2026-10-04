@@ -298,6 +298,11 @@ Sirve también para pickers con `showMonths > 1` (rango del dashboard). Además 
 header queda centrado con texto blanco, y el calendario acompaña al campo cuando
 se scrollea el modal (`onOpen`/`onClose` reposicionan con el scroll interno).
 
+**Con el teclado abierto (móvil)**: tocar un día del calendario con el teclado del teléfono abierto obligaba a elegir la
+fecha dos veces (el campo perdía el foco antes del clic, el teclado se cerraba, y el manejador del `blur` volvía a aplicar el
+texto viejo y redibujaba el calendario). Ahora el `mousedown` dentro del calendario no le quita el foco al campo, el manejador
+del `blur` no hace nada si el texto no cambió, y el teclado se cierra al elegir la fecha (`onChange`).
+
 ## Slider (range input)
 
 ```csharp
@@ -333,7 +338,12 @@ Caso simple (sin cascada, sin subgrid):
 
 Con cascada (el campo padre necesita `IsCascadeParent = true` para que
 `grid.js` — `initCascadeListeners`/`applyCascade` — le añada el listener;
-el filtrado en sí sigue viviendo en `grid.js`, no en este paquete):
+el filtrado en sí sigue viviendo en `grid.js`, no en este paquete).
+
+Las opciones que no corresponden al padre elegido se **quitan del select**: no se ocultan (`hidden`) ni se deshabilitan
+(`disabled`), porque iOS Safari ignora `hidden` en `<option>` y las dejaba visibles en gris. La lista completa se guarda en
+el propio select (`_cascadeAllOptions`) y se restaura al cambiar de padre; el valor actual se conserva solo si sigue siendo
+válido, si no vuelve al placeholder:
 
 ```csharp
 new SelectModel

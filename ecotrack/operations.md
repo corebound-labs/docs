@@ -32,16 +32,21 @@ migración sobre una base propia, pasa `--connection` (así se comprobaron las d
 temporal, incluido el `Down`).
 
 ## Despliegue
-- Se publica desde **Visual Studio** (perfil Web Deploy o FTP; los `.pubxml` no van al repositorio). El workflow de
-  GitHub Actions para SmarterASP no se usa.
+- Se despliega con **GitHub Actions** (workflow **Deploy a SmarterASP.NET**, Web Deploy): arranca **cuando termina bien
+  _Release_** en `master` (o a mano desde Actions con *Run workflow*, por ejemplo para repetir un despliegue). Compila con las
+  etiquetas ya creadas, así que el pie muestra la versión recién publicada. Los `.pubxml` no van al repositorio.
 - Antes: copia de seguridad si hay migraciones; después: la lista de abajo.
 - **Versión visible** en el pie de la barra lateral y en las pantallas de acceso: sale de `git describe --tags`
-  al compilar (`AppVersion`, con `EcoTrack.csproj`). Necesita `git` y las etiquetas en la máquina que publica; sin
-  ellas cae a `v1.0.0`. En una rama con commits sobre la etiqueta se ve `v1.0.0-157+N` (N commits por delante).
+  al compilar (`AppVersion`, con `EcoTrack.csproj`). Necesita `git` y las etiquetas en la máquina que compila (el workflow
+  baja el historial completo); sin ellas cae a `v1.0.0`. Cómo se numeran las versiones: [Versiones](/ecotrack/versioning.md).
+- **Comprobación tras el despliegue**: el último paso llama a `<SITE_URL>/health` y falla si el sitio no sirve la versión
+  recién publicada (reintenta unos 3 minutos mientras el sitio reinicia). Necesita el **secret o la variable `SITE_URL`**
+  (`https://tu-dominio`, sin barra final) en *Settings → Secrets and variables → Actions*; sin ella solo avisa y pasa.
 
 ## Lista tras desplegar
 1. Abrir dos o tres páginas con la consola del navegador (F12): sin violaciones de CSP.
 2. Ctrl+F5 (los ficheros estáticos de JS/CSS se cachean fuerte; llevan `?v=` que cambia con el contenido).
+   Si el pie no muestra la versión nueva, abre `/health` (debe devolverla) y cierra del todo la app instalada.
 3. `curl -sI https://ecotracks.app/`: HSTS de 1 año, CSP con nonce, sin `Server` ni `X-Powered-By`
    (dependen de que el hosting respete el `web.config`).
 4. Entrar con la cuenta de administrador y **activar su 2FA** (sin él no se abre el panel).
