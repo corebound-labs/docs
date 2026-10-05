@@ -256,6 +256,18 @@ el valor por JS, `syncNumberInputValue(field, invariantValue)` en vez de
 con CSS (`.ui-number-input-wrapper`), nunca forma parte del valor que viaja
 en el submit. Sin el atributo, el `<input>` se renderiza suelto como antes.
 
+**Importes negativos en el móvil (botón ±)**: el teclado numérico de iOS (`inputmode="decimal"`) **no tiene la tecla "-"**, así
+que no se podía escribir un gasto ni un saldo en rojo. En pantallas táctiles (`(pointer: coarse)`), los campos que admiten
+negativos reciben un botón **±** de 44 px al lado (`attachNumberSignButton`, desde `initNumberInputs`):
+
+- Un toque invierte el signo del valor (`1.931,25` ↔ `-1.931,25`; el `0` se queda en `0`).
+- En un campo vacío arranca un negativo (`-`) para seguir tecleando los dígitos, y otro toque lo vacía.
+- No le quita el foco al campo: el teclado no se cierra. Lanza un evento `input` para que reaccione la validación.
+- Con prefijo de moneda, el botón queda **fuera** de `.ui-number-input-wrapper`.
+- No aparece con ratón, ni en los inputs del mini-modal de subgrid.
+- `SimpleInputModel.AllowNegative` (por defecto `true`, se escribe como `data-allow-negative`) lo controla. `_Grid.cshtml` lo pone
+  en `false` cuando la propiedad tiene `[Range]` con mínimo mayor o igual que 0 (porcentajes y similares).
+
 ### `_TextAreaInput.cshtml` — opt-in vía `[TextAreaField]`
 
 Cualquier propiedad `string` del ViewModel marcada `[TextAreaField(Rows = 5)]`
