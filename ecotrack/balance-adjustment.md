@@ -43,12 +43,28 @@ transacción más, con estas particularidades:
   nombre no pisa un movimiento que otro cotitular haya cargado mientras tenías el modal abierto.
 - Si el campo no viaja de vuelta en el envío, la edición simplemente no ajusta: nunca ajusta de más.
 
+### `BalanceAtLoad` tiene que viajar en el formulario
+
+`BalanceAtLoad` es `[ModalHidden]` en el ViewModel, y el modal **no dibuja** los campos `[ModalHidden]` (ni siquiera como
+`<input type="hidden">`). Durante un tiempo eso hizo que, al **editar** una billetera, `BalanceAtLoad` llegara siempre vacío y
+**ningún cambio de saldo se guardara** (sin ningún error). Al crear una billetera con saldo inicial sí funcionaba, porque ese
+camino no usa `BalanceAtLoad`.
+
+Ahora `wallet.js` envuelve `openFormModal`: para el modal de billetera añade el `<input type="hidden" name="BalanceAtLoad">` y
+lo rellena, justo tras abrirse, con el valor **invariante** que mostraba "Saldo actual" (`1.931,25` → `1931.25`); al crear
+queda vacío. Lo carga la página `Account/Details`, la única con la grilla de billeteras. Regresión cubierta por
+`EcoTrack.MobileTests/tests/wallet-balance.spec.js`.
+
+> Cualquier campo `[ModalHidden]` que deba viajar en el envío necesita lo mismo: un input oculto añadido por JS (o un valor
+> forzado, `ForcedValues`).
+
 ## Dónde está en el código
 
 | Pieza | Ubicación |
 |---|---|
 | Campo y aviso | `WalletViewModel.Balance` / `BalanceAtLoad` (`EcoTrack/ViewModels`) |
 | Orquestación del guardado | `CommonController.Save`, tras `SaveWalletHandler` |
+| Enviar `BalanceAtLoad` desde el modal | `wwwroot/js/wallet.js` (`captureWalletBalanceAtLoad`) |
 | Crear el ajuste | `Features/Wallets/AdjustWalletBalance` (`AdjustWalletBalanceHandler`) |
 | Cálculo del saldo | `WalletBalanceCalculator` (`Common/Services`), compartido por el modal y el handler |
 | Exclusión de ingresos/gastos | `AnalyticsCore` |

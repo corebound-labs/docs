@@ -23,6 +23,9 @@ personas en cuentas compartidas) ni intercepta peticiones que no sean navegacion
 
 - `viewport-fit=cover` y `env(safe-area-inset-*)`: el contenido respeta el notch y la barra inferior del iPhone.
 - Alturas con `100dvh` (con `100vh` de respaldo): siguen la parte visible cuando la barra del navegador se esconde.
+- **Importes negativos**: el teclado numérico de iOS no tiene la tecla "-". Los campos numéricos que admiten negativos
+  (importe de una transacción, "Saldo actual") llevan un botón **±** al lado que invierte el signo. Ver
+  [UiMetadata.Elements](/packages/uimetadata-elements.md).
 - Los campos de texto miden al menos **16 px**, para que iOS no haga zoom al enfocarlos; los botones principales, al menos
   **44 px** de alto.
 
