@@ -93,6 +93,22 @@ builder.Services.AddControllersWithViews()
 (Si usás `UiMetadata.Grid`, `_UiMetadataStyles.cshtml`/
 `_UiMetadataScripts.cshtml` ya incluyen todo esto.)
 
+## Componentes añadidos (tag helpers y piezas JS)
+
+Además de los parciales de esta página, el paquete incluye `<ui-card>`
+(+ `<ui-card-actions>`), `<ui-section>` (sección plegable), `<ui-segmented>`
+(+ `<ui-segment>`), `<ui-banner>` y `<ui-avatar>`; los scripts `ui-card.js`,
+`ui-segmented.js`, `ui-slider.js`, `ui-autocomplete.js` (`UiAutocomplete.attach`),
+`ui-popover.js` (`UiPopover`, `UiContextMenu`), `textarea.js` (contador),
+`copy.js` (`data-ui-copy`) y `form-controls.js`; tooltips con `data-tooltip`; y
+`UiIcons.Register(nombre, paths)` para añadir iconos desde la aplicación. Los
+colores salen de `uimetadata.tokens.css` (`--ui-*`). Ejemplos de cada uno en la
+[guía de uso](/packages/uimetadata-guia-uso.md).
+
+Modelos: `SelectModel` (`SelectedValue`, `ShowPlaceholder`; `Id`/`Name`
+opcionales), `SwitchModel` (`InputCssClass`, `Title`), `SimpleInputModel` para
+textarea (`CssClass`, `ShowCounter`, `ReadOnly`, `Hidden`, `ExtraAttributesRaw`).
+
 ## Switch
 
 ```csharp
@@ -102,7 +118,7 @@ builder.Services.AddControllersWithViews()
 })
 ```
 
-> Nota de paridad: `Disabled` solo decora el `<label class="switch">`,
+> Nota de paridad: `Disabled` solo decora el `<label class="ui-switch">`,
 > nunca añade `disabled` al `<input>` real — réplica intencional del
 > markup previo a la extracción.
 
@@ -207,9 +223,9 @@ Sin valor en `Items` (consumidor sin CSP) el helper no toca el tag: es inocuo si
 usa. Un `<script src="...">` no lleva nonce (lo autoriza `'self'` o el CDN de la
 política).
 
-`syncSliderValue(targetId, source)` y `submitFormById(formId)` (`elements.js`)
-son las dos funciones que reemplazan a los únicos `onclick`/`oninput` del paquete
-que no eran una llamada simple.
+`submitFormById(formId)` (`elements.js`) es la función que reemplaza al único
+`onclick` del paquete que no era una llamada simple. (`syncSliderValue` ya no
+existe: el valor del slider lo actualiza `ui-slider.js`, ver la sección Slider.)
 
 ## Inputs simples
 
@@ -325,7 +341,13 @@ del `blur` no hace nada si el texto no cambió, y el teclado se cierra al elegir
 ```
 
 `ShowValue = true` (default) muestra el valor actual junto al slider,
-actualizado en vivo con un `oninput` simple. En `UiMetadata.Grid` se activa
+actualizado en vivo por `ui-slider.js` (atributo `data-ui-slider-text`), sin JS
+propio. Con `ShowInput = true` el valor se edita además en un
+`<input type="number">` enlazado en ambos sentidos (`data-ui-slider-link`): el
+número lleva `Id` y `Name`; el range se llama `{Id}Range` y no se envía en el
+formulario. Para etiqueta + slider juntos está `_SliderField`
+(`SliderFieldModel`). `min`/`max`/`step` salen con cultura invariante, para que
+`0,01` no lo rechace el navegador. En `UiMetadata.Grid` se activa
 por reflection con `[SliderField(min, max, step)]` (`UiMetadata.Contracts`)
 en vez de usarse manualmente.
 
@@ -562,6 +584,15 @@ Overlay CSS puro (sin GIF) — `showLoader`/`hideLoader` mantienen el mismo
 nombre/firma que cualquier implementación anterior basada en imagen, son
 parte del contrato que ya invocan `grid.js` y el JS de la app (togglean la
 clase `.is-active` sobre `#app-loader`).
+
+`loader.js` publica también `Loader.show(texto?)` / `Loader.hide()`. Además del
+overlay (`_Loader.cshtml`, `#app-loader`) hay un panel con texto
+(`_LoaderPanel.cshtml`, `#appLoader`, se oculta con `is-hidden`) que admite carga
+inicial: con `data-ui-loader-initial` nace visible y se oculta cuando la página
+ha cargado y no quedan `fetch` pendientes (`data-ui-loader-quiet-ms`,
+`data-ui-loader-initial-timeout-ms`, `data-ui-loader-ignore`). Un `show()`
+manual se oculta solo a los 30 s. Sin el atributo `data-ui-loader-initial` no
+se toca `fetch`.
 
 **Demo en vivo** (1.5s):
 
