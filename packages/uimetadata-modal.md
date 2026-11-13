@@ -226,6 +226,12 @@ const m = UiModal.create({ title: "...", body: nodo, size: "sm" }); m.open();
 // eventos: ui-modal:open, ui-modal:close
 ```
 
+> ⚠️ Dos modales conviven en el paquete. El **modal antiguo** (`modal.css`: grid, `ViewComponent`
+> Modal, "expandir chart") usa `.ui-modal` como *overlay* (`display:none`, `position:fixed`, fondo) y
+> `.ui-modal-content` como caja. El **modal nuevo** (`ui-modal.css`) usa `.ui-modal-overlay` como overlay
+> y `.ui-modal` como caja, por eso su regla va acotada a `.ui-modal-overlay > .ui-modal`. No definas un
+> `.ui-modal` suelto en CSS propio: afectaría a los dos.
+
 Nace oculto; `size` es `sm`, `md` (defecto) o `lg`. `subtitle` null no pinta nada; una
 cadena vacía pinta un `<p id="{id}-subtitle">` oculto mientras esté vacío, para
 rellenarlo por JS.
