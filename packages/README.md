@@ -12,6 +12,8 @@ Hay dos familias:
 - **`UiMetadata.*`** — Razor Class Libraries de UI:
   [Contracts](/packages/uimetadata-contracts.md), [Grid](/packages/uimetadata-grid.md), [Modal](/packages/uimetadata-modal.md), [Elements](/packages/uimetadata-elements.md), [Sidebar](/packages/uimetadata-sidebar.md), [Charts](/packages/uimetadata-charts.md), [Notifications](/packages/uimetadata-notifications.md).
 
+Para aplicar las piezas de `UiMetadata.*` en una pantalla nueva (parciales, tag helpers, JS, tokens) hay una [guía de uso](/packages/uimetadata-guia-uso.md).
+
 Cada página sigue la misma estructura: qué es, cuándo usarlo, instalación,
 ejemplo mínimo, archivos a tocar y dependencias.
 
@@ -41,6 +43,7 @@ graph TD
         Notifications[Notifications]
     end
 
+    Sidebar --> Elements
     Grid --> Contracts
     Grid --> Elements
     Grid --> Modal
@@ -73,7 +76,7 @@ graph TD
 
 Sin flecha entrante = paquete base, sin dependencias de otro `Commons.*`/
 `UiMetadata.*` de este catálogo (`Contracts`, `Elements`, `Modal`,
-`Sidebar`, `CrudOrm`, `Infisical`, `ExceptionHandler`, `Email`,
+`CrudOrm`, `Infisical`, `ExceptionHandler`, `Email`,
 `BackgroundJobs`, `Importing`). Click en cualquier nodo para ir a su página.
 
 ## Fuente de verdad

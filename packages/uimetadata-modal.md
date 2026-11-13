@@ -209,6 +209,27 @@ Entidades que comparten controller (`Product`/`Variant`) usan el placeholder de 
 1. **`entityType` sin strip de `"ViewModel"` en la URL** — `data-entity-type` es el nombre completo de la clase (`"VariantViewModel"`), correcto para los ids del form pero no para la acción del controller (`GetVariantById`, sin sufijo). Sin el strip, la URL armada era `/Product/GetVariantViewModelById/...` → 404. Fix: `entityType.replace(/ViewModel$/, "")` **solo** al armar la URL.
 2. **`Json(vm)` camelCasea los nombres de propiedad por default en ASP.NET Core**, pero `fillModalForm` busca campos por `name="Variant_Id"` (PascalCase). El fetch llegaba 200 OK pero ningún campo coincidía — modal siempre vacío, sin error visible. Fix: los `GetById` devuelven `new JsonResult(vm, new System.Text.Json.JsonSerializerOptions())` en vez de `Json(vm)`.
 
+## `<ui-modal>` y `UiModal` (modal de contenido libre)
+
+Modal declarado en Razor o creado por código, con el mismo marcado (`ui-modal.css`, `ui-modal.js`):
+
+```html
+<ui-modal id="rolesModal" title="Roles" subtitle="opcional" size="lg" close-on-overlay="false" close-on-escape="false" show-close="false" close-label="Cerrar">
+    ...cuerpo...
+    <ui-modal-footer><button type="button" data-ui-modal-close>Cerrar</button></ui-modal-footer>
+</ui-modal>
+```
+
+```js
+UiModal.open("rolesModal");  UiModal.close("rolesModal");   // o data-ui-modal-open="id"
+const m = UiModal.create({ title: "...", body: nodo, size: "sm" }); m.open();
+// eventos: ui-modal:open, ui-modal:close
+```
+
+Nace oculto; `size` es `sm`, `md` (defecto) o `lg`. `subtitle` null no pinta nada; una
+cadena vacía pinta un `<p id="{id}-subtitle">` oculto mientras esté vacío, para
+rellenarlo por JS.
+
 ## Toast — uso mínimo
 
 ```js
@@ -221,7 +242,11 @@ toastInfo("3 elementos actualizados");
 showToast({ type: "success", icon: "🎉", text: "Listo", durationMs: 6000 });
 ```
 
-`durationMs: 0` deja el toast visible hasta que el usuario lo cierra con ×.
+`durationMs: 0` deja el toast visible hasta que el usuario lo cierra con ×. Opciones
+nuevas de `showToast`: `position: "center"` (tarjeta centrada con icono grande),
+`width`, `minHeight` y `onClose`; `UiToast.notify(tipo, mensaje, opciones)` es la
+forma corta. `confirmDialog` admite además `type` / `icon` / `iconClass` para la
+cabecera con icono.
 
 **Demo en vivo**:
 

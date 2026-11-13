@@ -383,6 +383,15 @@ config.GridCloneEnabled = true;
   los mismos permisos que "Crear"). Gated por `CanOpenModal`, igual que
   editar.
 
+## Acción de fila personalizada: `IconClass` y `HeaderTitle`
+
+`GridRowAction` (en `UiMetadata.Contracts`) admite `IconClass` (icono de fuente,
+p. ej. `"bi bi-person-gear"`, con prioridad sobre `Icon`) y `HeaderTitle`: si se
+informa, la cabecera de esa columna muestra el texto y `_Grid.cshtml` calcula el
+ancho (`max(40, letras × 9 + 32)` px, también en el descriptor de columnas que
+recibe `grid.js`). Sin `HeaderTitle` la columna sigue midiendo 40px y la
+cabecera queda vacía, como antes.
+
 ## Acciones compactas en móvil (menú contextual)
 
 Debajo de 599px de viewport, las columnas de acción (editar/ver, clonar,

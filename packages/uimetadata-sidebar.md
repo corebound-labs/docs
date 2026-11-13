@@ -121,6 +121,19 @@ topbar, y de `@RenderBody()`):
   layout consumidor declara por fuera de la partial — `sidebar.js` lo
   busca por ese id donde sea que esté en el DOM.
 
+## Secciones plegables, iconos de fuente y atributos extra
+
+- `SidebarModel.Sections` (`SidebarSectionModel`): secciones plegables entre la
+  navegación y el pie, con el cuerpo que pone la aplicación (`Content`,
+  normalmente un `Html.PartialAsync`). Se pintan con `<ui-section>`, por eso este
+  paquete depende de `UiMetadata.Elements`. Contraído el sidebar, solo queda el
+  icono de cada sección.
+- `IconClass` (ej. `"bi bi-chat"`) en ítems y acciones: tiene prioridad sobre
+  `IconSvg`, que deja de ser obligatorio (hace falta uno de los dos).
+- `Brand.LogoCssClass`: clase extra para la marca si el logo se dibuja con CSS.
+- Las acciones admiten atributos HTML extra (`data-*`, `aria-*`); el nombre solo
+  puede tener letras, cifras, `-` y `_`, y el valor se escapa.
+
 ## `StorageKey`
 
 ```csharp
@@ -178,4 +191,4 @@ variable, con fallback propio si `grid.css` no está cargado.
 
 ## Dependencias
 
-Ninguna de otro paquete `UiMetadata.*`.
+Depende de `UiMetadata.Elements` (las secciones plegables usan `<ui-section>`).

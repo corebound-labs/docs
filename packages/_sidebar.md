@@ -23,3 +23,4 @@
   - [UiMetadata.Sidebar](/packages/uimetadata-sidebar.md)
   - [UiMetadata.Charts](/packages/uimetadata-charts.md)
   - [UiMetadata.Notifications](/packages/uimetadata-notifications.md)
+  - [Guía de uso de UiMetadata](/packages/uimetadata-guia-uso.md)
